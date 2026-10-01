@@ -75,6 +75,29 @@
   }
 }
 
+/* Sitzungsdoku: gleiche Gestaltung, Akzent in Petrol statt Schwarz. */
+.theme-sessions {
+  --primary: oklch(0.46 0.085 200);
+  --primary-foreground: oklch(0.985 0.005 200);
+  --secondary: oklch(0.96 0.018 200);
+  --secondary-foreground: oklch(0.32 0.06 200);
+  --accent: oklch(0.96 0.018 200);
+  --accent-foreground: oklch(0.32 0.06 200);
+  --ring: oklch(0.68 0.08 200);
+}
+
+@media (prefers-color-scheme: dark) {
+  .theme-sessions {
+    --primary: oklch(0.78 0.09 195);
+    --primary-foreground: oklch(0.2 0.035 200);
+    --secondary: oklch(0.29 0.035 200);
+    --secondary-foreground: oklch(0.93 0.03 195);
+    --accent: oklch(0.29 0.035 200);
+    --accent-foreground: oklch(0.93 0.03 195);
+    --ring: oklch(0.6 0.08 195);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
