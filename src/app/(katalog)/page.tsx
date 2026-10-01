@@ -1,0 +1,132 @@
+import Link from "next/link";
+
+import { ExerciseMeta } from "@/components/exercise-meta";
+import { SearchBox } from "@/components/search-box";
+import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/server";
+import type { Exercise, TagCount } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+type ListItem = Pick<Exercise, "id" | "title" | "suitable_for" | "tags" | "online" | "group_size">;
+
+function toList(value: string | string[] | undefined) {
+  if (!value) return [];
+  return Array.isArray(value) ? value : [value];
+}
+
+function href(query: string, tags: string[]) {
+  const params = new URLSearchParams();
+  if (query) params.set("q", query);
+  tags.forEach((tag) => params.append("tag", tag));
+  const search = params.toString();
+  return search ? `/?${search}` : "/";
+}
+
+export default async function HomePage({ searchParams }: PageProps<"/">) {
+  const params = await searchParams;
+  const query = (toList(params.q)[0] ?? "").trim();
+  const selectedTags = toList(params.tag);
+
+  const supabase = await createClient();
+  const [search, tagResult] = await Promise.all([
+    supabase
+      .rpc("search_exercises", { q: query, tag_filter: selectedTags })
+      .select("id, title, suitable_for, tags, online, group_size"),
+    supabase.rpc("all_tags"),
+  ]);
+  const exercises = search.data as ListItem[] | null;
+  const tagCounts = tagResult.data as TagCount[] | null;
+  const error = search.error;
+
+  const filtering = Boolean(query || selectedTags.length);
+
+  return (
+    <div className="space-y-6">
+      <SearchBox key={selectedTags.join("\u0000")} initialQuery={query} tags={selectedTags} />
+
+      {tagCounts && tagCounts.length > 0 && (
+        <nav aria-label="Nach Tags filtern" className="flex flex-wrap gap-1.5">
+          {tagCounts.map(({ tag }) => {
+            const active = selectedTags.includes(tag);
+            const next = active ? selectedTags.filter((t) => t !== tag) : [...selectedTags, tag];
+            return (
+              <Badge
+                key={tag}
+                asChild
+                variant={active ? "default" : "outline"}
+                className={cn("rounded-full px-3 py-1 text-sm", !active && "text-muted-foreground")}
+              >
+                <Link href={href(query, next)} scroll={false} aria-pressed={active}>
+                  {tag}
+                </Link>
+              </Badge>
+            );
+          })}
+        </nav>
+      )}
+
+      {error && (
+        <p className="text-sm text-destructive">Die Übungen konnten nicht geladen werden.</p>
+      )}
+
+      {exercises && (
+        <>
+          <p className="text-sm text-muted-foreground">
+            {exercises.length === 1 ? "1 Übung" : `${exercises.length} Übungen`}
+            {filtering && (
+              <>
+                {" · "}
+                <Link href="/" className="underline underline-offset-4 hover:text-foreground">
+                  Filter zurücksetzen
+                </Link>
+              </>
+            )}
+          </p>
+
+          {exercises.length === 0 ? (
+            <div className="rounded-xl border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">
+              {filtering ? (
+                "Nichts gefunden. Versuch ein anderes Wort oder weniger Tags."
+              ) : (
+                <>
+                  Noch keine Übungen.{" "}
+                  <Link href="/uebungen/neu" className="underline underline-offset-4 hover:text-foreground">
+                    Erste Übung anlegen
+                  </Link>
+                </>
+              )}
+            </div>
+          ) : (
+            <ul className="divide-y rounded-xl border">
+              {exercises.map((exercise) => (
+                <li key={exercise.id}>
+                  <Link
+                    href={`/uebungen/${exercise.id}`}
+                    className="block space-y-2 px-4 py-4 transition-colors hover:bg-accent/50 sm:px-5"
+                  >
+                    <h2 className="font-medium leading-snug">{exercise.title}</h2>
+                    {exercise.suitable_for && (
+                      <p className="line-clamp-2 text-sm text-muted-foreground">
+                        {exercise.suitable_for}
+                      </p>
+                    )}
+                    <ExerciseMeta exercise={exercise} />
+                    {exercise.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {exercise.tags.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="font-normal">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
