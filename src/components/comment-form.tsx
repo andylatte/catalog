@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 
 import { addComment, discardUploads } from "@/app/actions";
+import { RICH_TEXT_HINT } from "@/components/rich-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -108,6 +109,7 @@ export function CommentForm({ exerciseId, userId }: { exerciseId: string; userId
           placeholder="Wie lief es? Was ist aufgefallen?"
           className="min-h-24"
         />
+        <p className="text-xs text-muted-foreground">{RICH_TEXT_HINT}</p>
       </div>
 
       {photos.length > 0 && (

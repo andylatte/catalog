@@ -7,6 +7,7 @@ import { deleteComment, deleteExercise } from "@/app/actions";
 import { CommentForm } from "@/components/comment-form";
 import { ConfirmButton } from "@/components/confirm-button";
 import { ExerciseMeta } from "@/components/exercise-meta";
+import { RichText } from "@/components/rich-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
@@ -108,17 +109,17 @@ export default async function ExercisePage({ params }: PageProps<"/catalog/[id]"
 
       {exercise.suitable_for && (
         <Section title="Wofür geeignet">
-          <p className="whitespace-pre-wrap">{exercise.suitable_for}</p>
+          <RichText text={exercise.suitable_for} />
         </Section>
       )}
 
       <Section title="Ablauf">
-        <p className="leading-relaxed whitespace-pre-wrap">{exercise.procedure}</p>
+        <RichText text={exercise.procedure} />
       </Section>
 
       {exercise.material && (
         <Section title="Material">
-          <p className="whitespace-pre-wrap">{exercise.material}</p>
+          <RichText text={exercise.material} />
         </Section>
       )}
 
@@ -152,7 +153,7 @@ export default async function ExercisePage({ params }: PageProps<"/catalog/[id]"
                     <Trash2 />
                   </ConfirmButton>
                 </div>
-                {comment.body && <p className="leading-relaxed whitespace-pre-wrap">{comment.body}</p>}
+                {comment.body && <RichText text={comment.body} />}
                 {comment.comment_photos.length > 0 && (
                   <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                     {comment.comment_photos.map((photo) => {

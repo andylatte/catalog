@@ -75,5 +75,5 @@ Beim Bearbeiten sind Metadaten (Art, Zeiten, Teilnehmer, Ort, Anhänge) und Inha
 Beobachtungen, Selbstreflexion) getrennt; wer den Inhalt mit ungespeicherten Änderungen verlässt,
 wird vorher gefragt.
 
-**Formatierung** in Methoden, Beobachtungen, Selbstreflexion und Kommentaren: `- ` oder `1. ` am Zeilenanfang
+**Formatierung** in allen längeren Textfeldern (Katalog: Wofür geeignet, Ablauf, Material, Praxis-Log; Sitzungsdoku: Methoden, Beobachtungen, Selbstreflexion, Kommentare): `- ` oder `1. ` am Zeilenanfang
 für Listen, `**fett**`, `[rot]Text[/rot]` (auch `grün`, `blau`, `orange`, `lila`).
