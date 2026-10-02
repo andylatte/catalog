@@ -24,6 +24,12 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-catalog: var(--catalog);
+  --color-mark-red: var(--mark-red);
+  --color-mark-green: var(--mark-green);
+  --color-mark-blue: var(--mark-blue);
+  --color-mark-orange: var(--mark-orange);
+  --color-mark-purple: var(--mark-purple);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -50,6 +56,14 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  /* Streifen über dem Katalog-Kopf (die Sitzungsdoku hat Petrol). */
+  --catalog: oklch(0.68 0.15 55);
+  /* Farben für [rot]…[/rot] usw. in Texten. */
+  --mark-red: oklch(0.55 0.2 27);
+  --mark-green: oklch(0.52 0.13 150);
+  --mark-blue: oklch(0.5 0.15 255);
+  --mark-orange: oklch(0.6 0.16 55);
+  --mark-purple: oklch(0.5 0.17 305);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -72,6 +86,12 @@
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);
+    --catalog: oklch(0.74 0.14 60);
+    --mark-red: oklch(0.72 0.16 25);
+    --mark-green: oklch(0.76 0.14 150);
+    --mark-blue: oklch(0.74 0.12 250);
+    --mark-orange: oklch(0.78 0.14 65);
+    --mark-purple: oklch(0.74 0.13 305);
   }
 }
 
@@ -101,6 +121,10 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  html {
+    /* Platz für die Scrollleiste immer freihalten, damit der Kopf beim Wechsel nicht springt. */
+    scrollbar-gutter: stable;
   }
   body {
     @apply bg-background text-foreground;

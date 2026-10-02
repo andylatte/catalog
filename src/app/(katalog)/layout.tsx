@@ -8,14 +8,14 @@ import { Button } from "@/components/ui/button";
 export default function KatalogLayout({ children }: LayoutProps<"/">) {
   return (
     <>
-      <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
+      <header className="sticky top-0 z-10 border-t-2 border-b border-t-catalog bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-4 px-4">
           <div className="flex min-w-0 items-center gap-2">
             <Link href="/" aria-label="Zur Startseite">
               <Logo />
             </Link>
             <span className="text-muted-foreground/50">/</span>
-            <Link href="/exercises" className="truncate font-semibold tracking-tight">
+            <Link href="/catalog" className="truncate font-semibold tracking-tight">
               Übungskatalog
             </Link>
           </div>
@@ -28,7 +28,7 @@ export default function KatalogLayout({ children }: LayoutProps<"/">) {
               </Link>
             </Button>
             <Button asChild size="sm">
-              <Link href="/exercises/neu">
+              <Link href="/catalog/neu">
                 <Plus />
                 <span className="hidden sm:inline">Neue Übung</span>
                 <span className="sr-only sm:hidden">Neue Übung</span>

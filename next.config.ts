@@ -1,9 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Der Katalog lag früher unter /uebungen; alte Lesezeichen weiterleiten.
+  // Der Katalog lag früher unter /uebungen und /exercises; alte Lesezeichen weiterleiten.
   async redirects() {
-    return [{ source: "/uebungen/:path*", destination: "/exercises/:path*", permanent: true }];
+    return [
+      { source: "/uebungen/:path*", destination: "/catalog/:path*", permanent: true },
+      { source: "/exercises/:path*", destination: "/catalog/:path*", permanent: true },
+    ];
   },
 };
 

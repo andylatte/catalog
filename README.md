@@ -1,6 +1,8 @@
-# Übungskatalog
+# modulo
 
-Persönliche Web-App für Übungen aus Theatertherapie und Supervision: Übungen anlegen, per Suchschlitz und Tags finden, und unter jeder Übung ein Praxis-Log mit Datum und Fotos führen.
+Persönliche Web-App für Theatertherapie und Supervision. Die Startseite führt in zwei Bereiche.
+
+Der **Übungskatalog** unter `/catalog`: Übungen anlegen, per Suchschlitz und Tags finden, und unter jeder Übung ein Praxis-Log mit Datum und Fotos führen.
 
 Dazu gehört die **Sitzungsdoku** unter `/sessions`: Supervisions- und Therapiestunden mit Anhängen und Kommentaren dokumentieren, im gleichen Stil mit Petrol als Akzentfarbe.
 
@@ -13,7 +15,9 @@ Gebaut mit Next.js (App Router), Tailwind CSS, shadcn/ui und Supabase (Datenbank
    [`supabase/migrations/20261001000000_init.sql`](supabase/migrations/20261001000000_init.sql)
    ausführen, danach ebenso
    [`supabase/migrations/20261001120000_sessions.sql`](supabase/migrations/20261001120000_sessions.sql)
-   für die Sitzungsdoku. Das legt Tabellen, Suche, Zugriffsregeln und die privaten Buckets
+   für die Sitzungsdoku und danach
+   [`supabase/migrations/20261002080000_sessions_endzeit_teilnehmer.sql`](supabase/migrations/20261002080000_sessions_endzeit_teilnehmer.sql)
+   (Endzeit, Teilnehmerliste). Das legt Tabellen, Suche, Zugriffsregeln und die privaten Buckets
    `fotos` und `anhaenge` an.
    (Alternativ mit der Supabase CLI: `npx supabase link` und `npx supabase db push`.)
 3. **Eigenes Konto anlegen:** *Authentication → Users → Add user* mit E-Mail und Passwort.
@@ -40,11 +44,11 @@ erreichbar; ohne Anmeldung sieht man nur die Login-Seite.
 
 | Pfad | Inhalt |
 | --- | --- |
-| `src/app/(katalog)/page.tsx` | Übersicht mit Suche und Tag-Filter |
-| `src/app/(katalog)/uebungen/` | Übung anlegen, ansehen, bearbeiten |
+| `src/app/page.tsx` | Startseite mit Logo und den beiden Bereichen |
+| `src/app/(katalog)/catalog/` | Übersicht mit Suche und Tag-Filter; Übung anlegen, ansehen, bearbeiten |
 | `src/app/actions.ts` | Speichern, Löschen, Anmelden (Server Actions) |
 | `src/components/comment-form.tsx` | Praxis-Log-Eintrag mit Foto-Upload |
-| `src/app/(sessions)/sessions/` | Sitzungsdoku: Liste, anlegen, ansehen, bearbeiten |
+| `src/app/(sessions)/sessions/` | Sitzungsdoku: Liste, anlegen, ansehen, bearbeiten; `/sessions/<name>` zeigt alle Sitzungen mit einer Person |
 | `src/app/session-actions.ts` | Sitzungen und Kommentare speichern und löschen |
 | `src/components/session-form.tsx` | Eingabemaske einer Sitzung mit Datei-Upload |
 | `src/proxy.ts` | Leitet Abgemeldete zum Login |
@@ -61,7 +65,11 @@ online geeignet (ja/nein/keine Angabe), Herkunft, Gruppengröße, Material.
 privaten Bucket. Angezeigt werden sie über Links, die nach einer Stunde ablaufen.
 
 **Felder einer Sitzung:** Pflicht sind Art (Supervision oder Therapie) und Datum. Optional:
-Uhrzeit und Dauer in Minuten, Auftraggeber, Teilnehmer, Einzel/Gruppe, Live/Online mit Ort bzw.
+Beginn und Ende (die Dauer wird daraus berechnet), Auftraggeber, Teilnehmer, Einzel/Gruppe, Live/Online mit Ort bzw.
 Plattform, Methoden/Programm, Beobachtungen, Dateianhänge (bis 25 MB je Datei, Fotos werden
-wie im Katalog verkleinert). Die Übersicht zeigt Datum, Art, Auftraggeber und Teilnehmer und lässt
-sich nach Art filtern; auf der Detailseite stehen die Kommentare.
+wie im Katalog verkleinert). Die Übersicht zeigt Datum, Art, Dauer, Auftraggeber und Teilnehmer und lässt
+sich nach Art filtern; auf der Detailseite stehen die Kommentare. Teilnehmer werden als Namen
+eingegeben (bekannte werden vorgeschlagen); ein Klick auf einen Namen zeigt alle Sitzungen mit ihm.
+
+**Formatierung** in Methoden, Beobachtungen und Kommentaren: `- ` oder `1. ` am Zeilenanfang
+für Listen, `**fett**`, `[rot]Text[/rot]` (auch `grün`, `blau`, `orange`, `lila`).

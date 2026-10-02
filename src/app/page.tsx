@@ -29,7 +29,7 @@ export default function StartPage() {
             </Button>
           </div>
           <Button asChild size="lg" className="h-20 w-full flex-col gap-1.5 px-2 text-base sm:h-14 sm:flex-row sm:gap-2">
-            <Link href="/exercises">
+            <Link href="/catalog">
               <BookOpen />
               Übungssammlung
             </Link>

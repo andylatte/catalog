@@ -21,7 +21,7 @@ export default function SessionsLayout({ children }: LayoutProps<"/">) {
           </div>
           <div className="flex items-center gap-1">
             <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
-              <Link href="/exercises">
+              <Link href="/catalog">
                 <BookOpen />
                 <span className="hidden sm:inline">Übungskatalog</span>
                 <span className="sr-only sm:hidden">Übungskatalog</span>

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 
+import { RICH_TEXT_HINT } from "@/components/rich-text";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -27,6 +28,7 @@ export function SessionCommentForm({
         className="min-h-20"
         required
       />
+      <p className="text-xs text-muted-foreground">{RICH_TEXT_HINT}</p>
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm text-destructive">{state?.error}</p>
         <Button type="submit" disabled={pending}>
