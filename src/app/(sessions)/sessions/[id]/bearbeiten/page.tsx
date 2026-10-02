@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 
+import { isImageName } from "@/components/attachment-tile";
 import { SessionForm } from "@/components/session-form";
 import { getParticipants } from "@/lib/sessions";
 import { createClient, getUserId } from "@/lib/supabase/server";
@@ -23,6 +24,19 @@ export default async function EditSessionPage({ params }: PageProps<"/sessions/[
   ]);
   if (!session) notFound();
 
+  // Vorschau für vorhandene Bilder; die Links laufen nach einer Stunde ab.
+  const fileUrls: Record<string, string> = {};
+  const images = (files ?? []).filter((file) => isImageName(file.name));
+  if (images.length) {
+    const { data: signed } = await supabase.storage
+      .from("anhaenge")
+      .createSignedUrls(images.map((file) => file.path), 60 * 60);
+    images.forEach((file, index) => {
+      const url = signed?.[index]?.signedUrl;
+      if (url) fileUrls[file.id] = url;
+    });
+  }
+
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold tracking-tight">Metadaten bearbeiten</h1>
@@ -31,6 +45,7 @@ export default async function EditSessionPage({ params }: PageProps<"/sessions/[
         userId={userId}
         session={session}
         files={files ?? []}
+        fileUrls={fileUrls}
         knownParticipants={participants.map((p) => p.name)}
         cancelHref={`/sessions/${session.id}`}
       />

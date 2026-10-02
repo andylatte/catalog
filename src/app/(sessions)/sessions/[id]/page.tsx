@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock, MapPin, Monitor, Paperclip, Pencil, Trash2, User, Users } from "lucide-react";
+import { ArrowLeft, Clock, MapPin, Monitor, Pencil, Trash2, User, Users } from "lucide-react";
 
 import { addSessionComment, deleteSession, deleteSessionComment } from "@/app/session-actions";
+import { AttachmentGrid, AttachmentTile, isImageName } from "@/components/attachment-tile";
 import { ConfirmButton } from "@/components/confirm-button";
 import { RichText } from "@/components/rich-text";
 import { SessionCommentForm } from "@/components/session-comment-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate, formatDateTime, formatFileSize, formatTimeSpan, slugify } from "@/lib/format";
+import { formatDate, formatDateTime, formatTimeSpan, slugify } from "@/lib/format";
 import { participantsForSlug } from "@/lib/sessions";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -24,7 +25,6 @@ import {
 import { ParticipantSessions } from "../participant-sessions";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const IMAGE = /\.(jpe?g|png|webp|gif|heic|heif)$/i;
 
 async function loadSession(id: string) {
   const supabase = await createClient();
@@ -92,8 +92,6 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
       .createSignedUrls(files.map((file) => file.path), 60 * 60);
     signed?.forEach((s) => s.path && s.signedUrl && fileUrls.set(s.path, s.signedUrl));
   }
-  const images = files.filter((file) => IMAGE.test(file.name));
-  const documents = files.filter((file) => !IMAGE.test(file.name));
 
   const time = formatTimeSpan(session.start_time, session.end_time, session.duration_minutes);
   const hasTexts = SESSION_TEXTS.some((text) => session[text.name]);
@@ -205,50 +203,20 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
 
       {files.length > 0 && (
         <Section title="Anhänge">
-          <div className="space-y-3">
-            {images.length > 0 && (
-              <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                {images.map((file) => {
-                  const url = fileUrls.get(file.path);
-                  return (
-                    <li key={file.id} className="aspect-square overflow-hidden rounded-md bg-muted">
-                      {url && (
-                        <a href={url} target="_blank" rel="noreferrer" title={file.name}>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={url}
-                            alt={file.name}
-                            loading="lazy"
-                            className="size-full object-cover transition-opacity hover:opacity-90"
-                          />
-                        </a>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-            {documents.length > 0 && (
-              <ul className="divide-y rounded-md border text-sm">
-                {documents.map((file) => (
-                  <li key={file.id}>
-                    <a
-                      href={fileUrls.get(file.path)}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 px-3 py-2 transition-colors hover:bg-accent/50"
-                    >
-                      <Paperclip className="size-4 shrink-0 text-muted-foreground" />
-                      <span className="min-w-0 flex-1 truncate">{file.name}</span>
-                      <span className="shrink-0 text-xs text-muted-foreground">
-                        {formatFileSize(file.size)}
-                      </span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+          <AttachmentGrid>
+            {files.map((file) => {
+              const url = fileUrls.get(file.path);
+              return (
+                <AttachmentTile
+                  key={file.id}
+                  name={file.name}
+                  size={file.size}
+                  href={url}
+                  previewUrl={url && isImageName(file.name) ? url : undefined}
+                />
+              );
+            })}
+          </AttachmentGrid>
         </Section>
       )}
 
