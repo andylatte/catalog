@@ -1,0 +1,31 @@
+name: Keep-alive
+
+# Supabase pausiert Free-Projekte nach einer Woche ohne Zugriffe.
+# Eine kleine Abfrage pro Tag hält das Projekt wach.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Supabase anfragen
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SECRET_KEY" ]; then
+            echo "::error::SUPABASE_URL oder SUPABASE_SECRET_KEY fehlt (siehe docs/betrieb.md)"
+            exit 1
+          fi
+          curl --fail --silent --show-error --output /dev/null \
+            -H "apikey: $SUPABASE_SECRET_KEY" \
+            "$SUPABASE_URL/rest/v1/exercises?select=id&limit=1"
+          echo "Supabase hat geantwortet."
