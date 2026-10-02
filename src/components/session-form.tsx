@@ -6,13 +6,14 @@ import { useRouter } from "next/navigation";
 import { Paperclip, Undo2, X } from "lucide-react";
 
 import { discardSessionUploads, saveSession, type NewSessionFile } from "@/app/session-actions";
+import { AttachmentGrid, AttachmentTile, isImageName } from "@/components/attachment-tile";
 import { ParticipantsInput } from "@/components/participants-input";
 import { SessionTextFields } from "@/components/session-text-fields";
 import { useUnsavedGuard } from "@/components/unsaved-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatDuration, formatFileSize, minutesBetween } from "@/lib/format";
+import { formatDuration, minutesBetween } from "@/lib/format";
 import { extensionFor, shrinkImage } from "@/lib/images";
 import { createClient } from "@/lib/supabase/client";
 import type { Session, SessionFile } from "@/lib/types";
@@ -24,6 +25,8 @@ type Props = {
   userId: string;
   session?: Session;
   files?: SessionFile[];
+  /** Signierte Links für die Vorschau vorhandener Bilder, nach Anhang-ID. */
+  fileUrls?: Record<string, string>;
   /** Bekannte Teilnehmer für die Vorschläge. */
   knownParticipants: string[];
   cancelHref: string;
@@ -69,6 +72,32 @@ function Field({
       {children}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
+  );
+}
+
+/** Kleiner runder Knopf auf einer Anhang-Kachel. */
+function TileButton({
+  label,
+  onClick,
+  disabled,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      className="rounded-full border bg-background/90 p-1 text-foreground shadow-xs hover:bg-background"
+    >
+      {children}
+    </button>
   );
 }
 
@@ -125,6 +154,7 @@ export function SessionForm({
   userId,
   session,
   files = [],
+  fileUrls = {},
   knownParticipants,
   cancelHref,
   withTexts = false,
@@ -148,7 +178,8 @@ export function SessionForm({
   const [startTime, setStartTime] = useState(session?.start_time?.slice(0, 5) ?? "");
   const [endTime, setEndTime] = useState(session?.end_time?.slice(0, 5) ?? "");
   const duration = formatDuration(minutesBetween(startTime || null, endTime || null));
-  const [pending, setPending] = useState<File[]>([]);
+  // Neue Dateien, Bilder mit lokaler Vorschau (Object-URL).
+  const [pending, setPending] = useState<{ file: File; preview?: string }[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +188,10 @@ export function SessionForm({
   function addFiles(list: FileList | null) {
     if (!list) return;
     // Erst kopieren: das Leeren des Feldes leert auch die FileList.
-    const added = Array.from(list);
+    const added = Array.from(list).map((file) => ({
+      file,
+      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+    }));
     setPending((current) => [...current, ...added]);
     if (fileInput.current) fileInput.current.value = "";
   }
@@ -175,7 +209,7 @@ export function SessionForm({
     const supabase = createClient();
     const uploaded: NewSessionFile[] = [];
     try {
-      for (const [index, file] of pending.entries()) {
+      for (const [index, { file }] of pending.entries()) {
         setStatus(`Anhang ${index + 1} von ${pending.length} wird hochgeladen …`);
         // Fotos werden wie im Katalog verkleinert, alles andere bleibt unverändert.
         let blob: Blob = file;
@@ -321,49 +355,54 @@ export function SessionForm({
         <div className="space-y-3">
           <p className="text-sm leading-none font-medium">Anhänge</p>
           {(files.length > 0 || pending.length > 0) && (
-            <ul className="divide-y rounded-md border text-sm">
+            <AttachmentGrid>
               {files.map((file) => {
                 const isRemoved = removed.includes(file.id);
                 return (
-                  <li key={file.id} className="flex items-center gap-3 px-3 py-2">
-                    <Paperclip className="size-4 shrink-0 text-muted-foreground" />
-                    <span className={cn("min-w-0 flex-1 truncate", isRemoved && "text-muted-foreground line-through")}>
-                      {file.name}
-                    </span>
-                    <span className="shrink-0 text-xs text-muted-foreground">{formatFileSize(file.size)}</span>
-                    <button
-                      type="button"
-                      disabled={busy}
-                      onClick={() =>
-                        setRemoved((current) =>
-                          isRemoved ? current.filter((f) => f !== file.id) : [...current, file.id],
-                        )
-                      }
-                      aria-label={isRemoved ? "Doch behalten" : "Anhang entfernen"}
-                      className="rounded-full p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      {isRemoved ? <Undo2 className="size-4" /> : <X className="size-4" />}
-                    </button>
-                  </li>
+                  <AttachmentTile
+                    key={file.id}
+                    name={file.name}
+                    size={file.size}
+                    previewUrl={isImageName(file.name) ? fileUrls[file.id] : undefined}
+                    muted={isRemoved}
+                    action={
+                      <TileButton
+                        disabled={busy}
+                        label={isRemoved ? "Doch behalten" : "Anhang entfernen"}
+                        onClick={() =>
+                          setRemoved((current) =>
+                            isRemoved ? current.filter((f) => f !== file.id) : [...current, file.id],
+                          )
+                        }
+                      >
+                        {isRemoved ? <Undo2 className="size-3.5" /> : <X className="size-3.5" />}
+                      </TileButton>
+                    }
+                  />
                 );
               })}
-              {pending.map((file, index) => (
-                <li key={`${file.name}-${index}`} className="flex items-center gap-3 px-3 py-2">
-                  <Paperclip className="size-4 shrink-0 text-primary" />
-                  <span className="min-w-0 flex-1 truncate">{file.name}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground">{formatFileSize(file.size)}</span>
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => setPending((current) => current.filter((_, i) => i !== index))}
-                    aria-label="Anhang entfernen"
-                    className="rounded-full p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-                  >
-                    <X className="size-4" />
-                  </button>
-                </li>
+              {pending.map(({ file, preview }, index) => (
+                <AttachmentTile
+                  key={`${file.name}-${index}`}
+                  name={file.name}
+                  size={file.size}
+                  previewUrl={preview}
+                  highlight
+                  action={
+                    <TileButton
+                      disabled={busy}
+                      label="Anhang entfernen"
+                      onClick={() => {
+                        if (preview) URL.revokeObjectURL(preview);
+                        setPending((current) => current.filter((_, i) => i !== index));
+                      }}
+                    >
+                      <X className="size-3.5" />
+                    </TileButton>
+                  }
+                />
               ))}
-            </ul>
+            </AttachmentGrid>
           )}
           <input
             ref={fileInput}
@@ -377,7 +416,7 @@ export function SessionForm({
             Dateien hinzufügen
           </Button>
           {removed.length > 0 && (
-            <p className="text-xs text-muted-foreground">Durchgestrichene Anhänge werden beim Speichern gelöscht.</p>
+            <p className="text-xs text-muted-foreground">Blass dargestellte Anhänge werden beim Speichern gelöscht.</p>
           )}
         </div>
       </div>
