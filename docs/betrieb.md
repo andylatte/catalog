@@ -10,8 +10,8 @@ Sitzungsdoku ist zusätzlich mit einer Authenticator-App (MFA) geschützt.
 
 - [ ] Projekt in der Region **Central EU (Frankfurt)** anlegen. Die Region lässt sich später
       nicht ändern.
-- [ ] Alle Dateien aus `supabase/migrations/` der Reihe nach im *SQL Editor* ausführen.
-      Die letzte, `20261002090000_sessions_mfa.sql`, sperrt die Sitzungsdoku ohne MFA.
+- Migrationen musst du nicht mehr von Hand ausführen, das macht die Action *Migrationen*
+  (siehe unten).
 - [ ] *Authentication → Users → Add user*: dein Konto mit einem Passwort aus dem
       Passwortmanager (mindestens 12 Zeichen).
 - [ ] *Authentication → Sign In / Providers*: „Allow new users to sign up“ ausschalten.
@@ -42,7 +42,12 @@ Sitzungsdoku ist zusätzlich mit einer Authenticator-App (MFA) geschützt.
 
 Die Session-Pooler-URL ist nötig, weil GitHub keine IPv6-Verbindung zur direkten
 Datenbank-Adresse aufbauen kann.
+Das Datenbank-Passwort sollte nur aus Buchstaben und Ziffern bestehen, sonst müssen
+Sonderzeichen in der URL umschrieben werden. Ein neues setzt du unter *Database → Settings →
+Reset database password*.
 
+- [ ] Unter *Actions → Migrationen → Run workflow* starten. Das bringt die Datenbank auf den
+      neuesten Stand. Danach läuft die Action bei jeder neuen Migration von selbst.
 - [ ] Unter *Actions → Backup → Run workflow* einmal von Hand starten und prüfen, dass
       ein Download erscheint. Ebenso *Keep-alive* einmal starten.
 
@@ -57,6 +62,7 @@ Datenbank-Adresse aufbauen kann.
 | --- | --- | --- |
 | `Backup` | sonntags 3 Uhr UTC | Datenbank-Inhalte, Konto mit MFA-Faktor und alle Fotos und Anhänge, verschlüsselt mit `BACKUP_PASSWORD`. Liegt 90 Tage unter *Actions* als Download, also etwa die letzten 12 Sicherungen. |
 | `Keep-alive` | täglich | Eine kleine Anfrage, damit Supabase das Projekt nicht pausiert. |
+| `Migrationen` | bei jeder Änderung in `supabase/migrations/` auf main | Spielt neue Migrationen ein. Beim ersten Lauf erkennt sie, welche du schon von Hand eingespielt hast, und überspringt diese. |
 
 Schlägt ein Lauf fehl, schickt GitHub eine E-Mail.
 
@@ -80,8 +86,9 @@ die App dann neu ein.
 
    Darin liegen `db/public.sql` (Inhalte), `db/auth.sql` (Konto und MFA-Faktor),
    `db/schema.sql` (zum Nachschlagen) und `storage/` mit allen Dateien.
-3. **Neues Supabase-Projekt** in Frankfurt anlegen und alle Migrationen ausführen
-   (siehe Checkliste). Kein Konto anlegen, das kommt aus dem Backup.
+3. **Neues Supabase-Projekt** in Frankfurt anlegen, `SUPABASE_DB_URL` in GitHub auf das neue
+   Projekt umstellen und *Actions → Migrationen → Run workflow* starten. Kein Konto anlegen,
+   das kommt aus dem Backup.
 4. **Datenbank einspielen** mit der Session-Pooler-URL des neuen Projekts, erst das Konto,
    dann die Inhalte:
 
