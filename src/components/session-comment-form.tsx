@@ -6,6 +6,7 @@ import { RICH_TEXT_HINT } from "@/components/rich-text";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { pasteAsMarkup } from "@/lib/paste-markup";
 
 type State = { error?: string } | undefined;
 
@@ -22,6 +23,7 @@ export function SessionCommentForm({
         Kommentar
       </Label>
       <Textarea
+        onPaste={pasteAsMarkup}
         id="comment-body"
         name="body"
         placeholder="Nachtrag, Reflexion, nächste Schritte …"

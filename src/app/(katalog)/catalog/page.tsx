@@ -46,7 +46,13 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
 
   return (
     <div className="space-y-6">
-      <SearchBox key={selectedTags.join("\u0000")} initialQuery={query} tags={selectedTags} />
+      <SearchBox
+        key={selectedTags.join("\u0000")}
+        initialQuery={query}
+        path="/catalog"
+        keep={selectedTags.map((tag) => ["tag", tag])}
+        label="Übungen durchsuchen"
+      />
 
       {tagCounts && tagCounts.length > 0 && (
         <nav aria-label="Nach Tags filtern" className="flex flex-wrap gap-1.5">

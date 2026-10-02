@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { pasteAsMarkup } from "@/lib/paste-markup";
 import type { Exercise } from "@/lib/types";
 
 type Props = {
@@ -49,6 +50,7 @@ export function ExerciseForm({ action, exercise, cancelHref }: Props) {
         </Field>
         <Field label="Ablauf" htmlFor="procedure" hint={RICH_TEXT_HINT}>
           <Textarea
+            onPaste={pasteAsMarkup}
             id="procedure"
             name="procedure"
             defaultValue={exercise?.procedure}
@@ -69,7 +71,12 @@ export function ExerciseForm({ action, exercise, cancelHref }: Props) {
             htmlFor="suitable_for"
             hint="Setting, Zielgruppe, Anlass, z. B. „zur Klärung eines unklaren Auftrags“; Formatierung wie beim Ablauf"
           >
-            <Textarea id="suitable_for" name="suitable_for" defaultValue={exercise?.suitable_for ?? ""} />
+            <Textarea
+              id="suitable_for"
+              name="suitable_for"
+              defaultValue={exercise?.suitable_for ?? ""}
+              onPaste={pasteAsMarkup}
+            />
           </Field>
           <Field label="Tags" htmlFor="tags" hint="Mit Komma trennen, z. B. Warm-up, Körper, Supervision">
             <Input id="tags" name="tags" defaultValue={exercise?.tags.join(", ")} />
@@ -92,7 +99,7 @@ export function ExerciseForm({ action, exercise, cancelHref }: Props) {
             </Field>
           </div>
           <Field label="Benötigtes Material" htmlFor="material" hint="Formatierung wie beim Ablauf">
-            <Textarea id="material" name="material" defaultValue={exercise?.material ?? ""} />
+            <Textarea id="material" name="material" defaultValue={exercise?.material ?? ""} onPaste={pasteAsMarkup} />
           </Field>
           <Field label="Herkunft" htmlFor="origin" hint="Wo kennengelernt, selbst erfahren, Quelle">
             <Input id="origin" name="origin" defaultValue={exercise?.origin ?? ""} />

@@ -54,6 +54,8 @@ export type Session = {
   methods: string | null;
   observations: string | null;
   self_reflection: string | null;
+  /** Session-Notes, z. B. KI-Notizen aus Zoom. */
+  notes: string | null;
   online: boolean | null;
   location: string | null;
   created_at: string;
@@ -74,7 +76,7 @@ export type SessionComment = {
 };
 
 export const SESSION_COLUMNS =
-  "id, kind, held_on, start_time, end_time, duration_minutes, participants, client, setting, methods, observations, self_reflection, online, location, created_at, updated_at";
+  "id, kind, held_on, start_time, end_time, duration_minutes, participants, client, setting, methods, observations, self_reflection, notes, online, location, created_at, updated_at";
 
 export type ParticipantCount = {
   name: string;
@@ -86,9 +88,18 @@ export const SESSION_KINDS: Record<SessionKind, string> = {
   therapie: "Therapie",
 };
 
-/** Die Textfelder einer Sitzung, in Anzeige-Reihenfolge. */
+/** Die Textfelder einer Sitzung, in Anzeige-Reihenfolge; `collapsed` ist in der Ansicht zugeklappt. */
 export const SESSION_TEXTS = [
-  { name: "methods", label: "Methoden / Programm", rows: "min-h-24" },
-  { name: "observations", label: "Beobachtungen", rows: "min-h-40" },
-  { name: "self_reflection", label: "Selbstreflexion", rows: "min-h-40" },
+  { name: "methods", label: "Methoden / Programm", rows: "min-h-24", collapsed: false, hint: null },
+  { name: "observations", label: "Beobachtungen", rows: "min-h-40", collapsed: false, hint: null },
+  { name: "self_reflection", label: "Selbstreflexion", rows: "min-h-40", collapsed: false, hint: null },
+  {
+    name: "notes",
+    label: "Session-Notes",
+    rows: "min-h-40",
+    collapsed: true,
+    hint: "Z. B. KI-Notizen aus Zoom: in Zoom Docs kopieren und hier einfügen. Überschriften, Listen und Fettes bleiben erhalten.",
+  },
 ] as const;
+
+export type SessionTextName = (typeof SESSION_TEXTS)[number]["name"];

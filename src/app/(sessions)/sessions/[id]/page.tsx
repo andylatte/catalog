@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Clock, MapPin, Monitor, Pencil, Trash2, User, Users } from "lucide-react";
+import { ArrowLeft, ChevronRight, Clock, MapPin, Monitor, Pencil, Trash2, User, Users } from "lucide-react";
 
 import { addSessionComment, deleteSession, deleteSessionComment } from "@/app/session-actions";
-import { AttachmentGrid, AttachmentTile, isImageName } from "@/components/attachment-tile";
+import { AttachmentReaders } from "@/components/attachment-reader";
+import { AttachmentGrid, AttachmentTile, isImageName, isReadableName } from "@/components/attachment-tile";
 import { ConfirmButton } from "@/components/confirm-button";
 import { RichText } from "@/components/rich-text";
 import { SessionCommentForm } from "@/components/session-comment-form";
@@ -183,17 +184,29 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
           </Button>
         </div>
         {hasTexts ? (
-          SESSION_TEXTS.map(
-            (text) =>
-              session[text.name] && (
-                <Section key={text.name} title={text.label}>
-                  <RichText text={session[text.name]!} />
-                </Section>
-              ),
-          )
+          SESSION_TEXTS.map((text) => {
+            const value = session[text.name];
+            if (!value) return null;
+            if (text.collapsed) {
+              return (
+                <details key={text.name} className="group space-y-2">
+                  <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase hover:text-foreground [&::-webkit-details-marker]:hidden">
+                    <ChevronRight className="size-4 transition-transform group-open:rotate-90" />
+                    {text.label}
+                  </summary>
+                  <RichText text={value} className="pt-1" />
+                </details>
+              );
+            }
+            return (
+              <Section key={text.name} title={text.label}>
+                <RichText text={value} />
+              </Section>
+            );
+          })
         ) : (
           <p className="text-sm text-muted-foreground">
-            Noch keine Methoden, Beobachtungen oder Selbstreflexion.{" "}
+            Noch keine Methoden, Beobachtungen, Selbstreflexion oder Session-Notes.{" "}
             <Link href={`/sessions/${session.id}/inhalt`} className="underline underline-offset-4 hover:text-foreground">
               Jetzt ergänzen
             </Link>
@@ -217,6 +230,12 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
               );
             })}
           </AttachmentGrid>
+          <AttachmentReaders
+            files={files.flatMap((file) => {
+              const url = fileUrls.get(file.path);
+              return url && isReadableName(file.name) ? [{ id: file.id, name: file.name, url }] : [];
+            })}
+          />
         </Section>
       )}
 
