@@ -19,6 +19,7 @@ export default async function NewSessionPage() {
         userId={userId}
         knownParticipants={participants.map((p) => p.name)}
         cancelHref="/sessions"
+        withTexts
       />
     </div>
   );

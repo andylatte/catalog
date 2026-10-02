@@ -66,10 +66,14 @@ privaten Bucket. Angezeigt werden sie über Links, die nach einer Stunde ablaufe
 
 **Felder einer Sitzung:** Pflicht sind Art (Supervision oder Therapie) und Datum. Optional:
 Beginn und Ende (die Dauer wird daraus berechnet), Auftraggeber, Teilnehmer, Einzel/Gruppe, Live/Online mit Ort bzw.
-Plattform, Methoden/Programm, Beobachtungen, Dateianhänge (bis 25 MB je Datei, Fotos werden
+Plattform, Methoden/Programm, Beobachtungen, Selbstreflexion, Dateianhänge (bis 25 MB je Datei, Fotos werden
 wie im Katalog verkleinert). Die Übersicht zeigt Datum, Art, Dauer, Auftraggeber und Teilnehmer und lässt
 sich nach Art filtern; auf der Detailseite stehen die Kommentare. Teilnehmer werden als Namen
 eingegeben (bekannte werden vorgeschlagen); ein Klick auf einen Namen zeigt alle Sitzungen mit ihm.
 
-**Formatierung** in Methoden, Beobachtungen und Kommentaren: `- ` oder `1. ` am Zeilenanfang
+Beim Bearbeiten sind Metadaten (Art, Zeiten, Teilnehmer, Ort, Anhänge) und Inhalt (Methoden,
+Beobachtungen, Selbstreflexion) getrennt; wer den Inhalt mit ungespeicherten Änderungen verlässt,
+wird vorher gefragt.
+
+**Formatierung** in Methoden, Beobachtungen, Selbstreflexion und Kommentaren: `- ` oder `1. ` am Zeilenanfang
 für Listen, `**fett**`, `[rot]Text[/rot]` (auch `grün`, `blau`, `orange`, `lila`).

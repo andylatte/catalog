@@ -53,6 +53,7 @@ export type Session = {
   setting: SessionSetting | null;
   methods: string | null;
   observations: string | null;
+  self_reflection: string | null;
   online: boolean | null;
   location: string | null;
   created_at: string;
@@ -73,7 +74,7 @@ export type SessionComment = {
 };
 
 export const SESSION_COLUMNS =
-  "id, kind, held_on, start_time, end_time, duration_minutes, participants, client, setting, methods, observations, online, location, created_at, updated_at";
+  "id, kind, held_on, start_time, end_time, duration_minutes, participants, client, setting, methods, observations, self_reflection, online, location, created_at, updated_at";
 
 export type ParticipantCount = {
   name: string;
@@ -84,3 +85,10 @@ export const SESSION_KINDS: Record<SessionKind, string> = {
   supervision: "Supervision",
   therapie: "Therapie",
 };
+
+/** Die Textfelder einer Sitzung, in Anzeige-Reihenfolge. */
+export const SESSION_TEXTS = [
+  { name: "methods", label: "Methoden / Programm", rows: "min-h-24" },
+  { name: "observations", label: "Beobachtungen", rows: "min-h-40" },
+  { name: "self_reflection", label: "Selbstreflexion", rows: "min-h-40" },
+] as const;

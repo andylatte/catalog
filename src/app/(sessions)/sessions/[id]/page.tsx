@@ -15,6 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   SESSION_COLUMNS,
   SESSION_KINDS,
+  SESSION_TEXTS,
   type Session,
   type SessionComment,
   type SessionFile,
@@ -95,6 +96,7 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
   const documents = files.filter((file) => !IMAGE.test(file.name));
 
   const time = formatTimeSpan(session.start_time, session.end_time, session.duration_minutes);
+  const hasTexts = SESSION_TEXTS.some((text) => session[text.name]);
   const hasMeta = time || session.setting || session.online !== null || session.location;
 
   return (
@@ -116,7 +118,7 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
         <div className="flex items-start justify-between gap-4">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{heading(session)}</h1>
           <div className="flex shrink-0 gap-1">
-            <Button asChild variant="ghost" size="icon" aria-label="Bearbeiten">
+            <Button asChild variant="ghost" size="icon" aria-label="Metadaten bearbeiten" title="Metadaten bearbeiten">
               <Link href={`/sessions/${session.id}/bearbeiten`}>
                 <Pencil />
               </Link>
@@ -172,17 +174,34 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
         </Section>
       )}
 
-      {session.methods && (
-        <Section title="Methoden / Programm">
-          <RichText text={session.methods} />
-        </Section>
-      )}
-
-      {session.observations && (
-        <Section title="Beobachtungen">
-          <RichText text={session.observations} />
-        </Section>
-      )}
+      <section className="space-y-6 rounded-xl border p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-lg font-semibold tracking-tight">Inhalt</h2>
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/sessions/${session.id}/inhalt`}>
+              <Pencil />
+              Bearbeiten
+            </Link>
+          </Button>
+        </div>
+        {hasTexts ? (
+          SESSION_TEXTS.map(
+            (text) =>
+              session[text.name] && (
+                <Section key={text.name} title={text.label}>
+                  <RichText text={session[text.name]!} />
+                </Section>
+              ),
+          )
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            Noch keine Methoden, Beobachtungen oder Selbstreflexion.{" "}
+            <Link href={`/sessions/${session.id}/inhalt`} className="underline underline-offset-4 hover:text-foreground">
+              Jetzt ergänzen
+            </Link>
+          </p>
+        )}
+      </section>
 
       {files.length > 0 && (
         <Section title="Anhänge">
