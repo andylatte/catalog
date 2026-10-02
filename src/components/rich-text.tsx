@@ -64,6 +64,14 @@ function blocks(source: string) {
   return result;
 }
 
+/** Text ohne Formatierungszeichen, für kurze Vorschauen in Listen. */
+export function plainText(text: string) {
+  return text
+    .replace(INLINE, (_match, bold, _color, colored) => bold ?? colored)
+    .replace(/^\s*(?:[-*•]|\d+[.)])\s+/gm, "")
+    .replace(/\s*\n\s*/g, " · ");
+}
+
 /** Zeigt Text mit der einfachen Formatierung an; alles andere bleibt, wie es getippt wurde. */
 export function RichText({ text, className }: { text: string; className?: string }) {
   return (
