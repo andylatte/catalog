@@ -7,6 +7,7 @@ import { deleteComment, deleteExercise } from "@/app/actions";
 import { CommentForm } from "@/components/comment-form";
 import { ConfirmButton } from "@/components/confirm-button";
 import { ExerciseMeta } from "@/components/exercise-meta";
+import { RichText } from "@/components/rich-text";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
@@ -25,7 +26,7 @@ async function loadExercise(id: string) {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/uebungen/[id]">): Promise<Metadata> {
+}: PageProps<"/catalog/[id]">): Promise<Metadata> {
   const exercise = await loadExercise((await params).id);
   return { title: exercise ? `${exercise.title} · Übungskatalog` : "Übungskatalog" };
 }
@@ -39,7 +40,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export default async function ExercisePage({ params }: PageProps<"/uebungen/[id]">) {
+export default async function ExercisePage({ params }: PageProps<"/catalog/[id]">) {
   const { id } = await params;
   const exercise = await loadExercise(id);
   if (!exercise) notFound();
@@ -69,7 +70,7 @@ export default async function ExercisePage({ params }: PageProps<"/uebungen/[id]
     <article className="space-y-10">
       <div className="space-y-4">
         <Link
-          href="/"
+          href="/catalog"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
@@ -79,7 +80,7 @@ export default async function ExercisePage({ params }: PageProps<"/uebungen/[id]
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{exercise.title}</h1>
           <div className="flex shrink-0 gap-1">
             <Button asChild variant="ghost" size="icon" aria-label="Bearbeiten">
-              <Link href={`/uebungen/${exercise.id}/bearbeiten`}>
+              <Link href={`/catalog/${exercise.id}/bearbeiten`}>
                 <Pencil />
               </Link>
             </Button>
@@ -108,17 +109,17 @@ export default async function ExercisePage({ params }: PageProps<"/uebungen/[id]
 
       {exercise.suitable_for && (
         <Section title="Wofür geeignet">
-          <p className="whitespace-pre-wrap">{exercise.suitable_for}</p>
+          <RichText text={exercise.suitable_for} />
         </Section>
       )}
 
       <Section title="Ablauf">
-        <p className="leading-relaxed whitespace-pre-wrap">{exercise.procedure}</p>
+        <RichText text={exercise.procedure} />
       </Section>
 
       {exercise.material && (
         <Section title="Material">
-          <p className="whitespace-pre-wrap">{exercise.material}</p>
+          <RichText text={exercise.material} />
         </Section>
       )}
 
@@ -152,7 +153,7 @@ export default async function ExercisePage({ params }: PageProps<"/uebungen/[id]
                     <Trash2 />
                   </ConfirmButton>
                 </div>
-                {comment.body && <p className="leading-relaxed whitespace-pre-wrap">{comment.body}</p>}
+                {comment.body && <RichText text={comment.body} />}
                 {comment.comment_photos.length > 0 && (
                   <ul className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                     {comment.comment_photos.map((photo) => {

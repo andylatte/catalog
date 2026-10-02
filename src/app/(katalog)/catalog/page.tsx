@@ -1,13 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ExerciseMeta } from "@/components/exercise-meta";
+import { plainText } from "@/components/rich-text";
 import { SearchBox } from "@/components/search-box";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
 import type { Exercise, TagCount } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-type ListItem = Pick<Exercise, "id" | "title" | "suitable_for" | "tags" | "online" | "group_size">;
+export const metadata: Metadata = { title: "Übungskatalog" };
+
+type ListItem = Pick<Exercise, "id" | "title" | "suitable_for" | "tags" | "online" | "group_size" | "origin">;
 
 function toList(value: string | string[] | undefined) {
   if (!value) return [];
@@ -19,10 +23,10 @@ function href(query: string, tags: string[]) {
   if (query) params.set("q", query);
   tags.forEach((tag) => params.append("tag", tag));
   const search = params.toString();
-  return search ? `/?${search}` : "/";
+  return search ? `/catalog?${search}` : "/catalog";
 }
 
-export default async function HomePage({ searchParams }: PageProps<"/">) {
+export default async function CatalogPage({ searchParams }: PageProps<"/catalog">) {
   const params = await searchParams;
   const query = (toList(params.q)[0] ?? "").trim();
   const selectedTags = toList(params.tag);
@@ -31,7 +35,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
   const [search, tagResult] = await Promise.all([
     supabase
       .rpc("search_exercises", { q: query, tag_filter: selectedTags })
-      .select("id, title, suitable_for, tags, online, group_size"),
+      .select("id, title, suitable_for, tags, online, group_size, origin"),
     supabase.rpc("all_tags"),
   ]);
   const exercises = search.data as ListItem[] | null;
@@ -42,7 +46,13 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
 
   return (
     <div className="space-y-6">
-      <SearchBox key={selectedTags.join("\u0000")} initialQuery={query} tags={selectedTags} />
+      <SearchBox
+        key={selectedTags.join("\u0000")}
+        initialQuery={query}
+        path="/catalog"
+        keep={selectedTags.map((tag) => ["tag", tag])}
+        label="Übungen durchsuchen"
+      />
 
       {tagCounts && tagCounts.length > 0 && (
         <nav aria-label="Nach Tags filtern" className="flex flex-wrap gap-1.5">
@@ -76,7 +86,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             {filtering && (
               <>
                 {" · "}
-                <Link href="/" className="underline underline-offset-4 hover:text-foreground">
+                <Link href="/catalog" className="underline underline-offset-4 hover:text-foreground">
                   Filter zurücksetzen
                 </Link>
               </>
@@ -90,7 +100,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               ) : (
                 <>
                   Noch keine Übungen.{" "}
-                  <Link href="/uebungen/neu" className="underline underline-offset-4 hover:text-foreground">
+                  <Link href="/catalog/neu" className="underline underline-offset-4 hover:text-foreground">
                     Erste Übung anlegen
                   </Link>
                 </>
@@ -101,13 +111,24 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               {exercises.map((exercise) => (
                 <li key={exercise.id}>
                   <Link
-                    href={`/uebungen/${exercise.id}`}
+                    href={`/catalog/${exercise.id}`}
                     className="block space-y-2 px-4 py-4 transition-colors hover:bg-accent/50 sm:px-5"
                   >
-                    <h2 className="font-medium leading-snug">{exercise.title}</h2>
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <h2 className="font-medium leading-snug">{exercise.title}</h2>
+                      {exercise.origin && (
+                        <Badge
+                          variant="outline"
+                          title="Herkunft"
+                          className="max-w-full border-catalog/50 font-normal whitespace-normal text-foreground/80"
+                        >
+                          {exercise.origin}
+                        </Badge>
+                      )}
+                    </div>
                     {exercise.suitable_for && (
                       <p className="line-clamp-2 text-sm text-muted-foreground">
-                        {exercise.suitable_for}
+                        {plainText(exercise.suitable_for)}
                       </p>
                     )}
                     <ExerciseMeta exercise={exercise} />

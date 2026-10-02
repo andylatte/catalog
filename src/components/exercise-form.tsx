@@ -4,10 +4,12 @@ import { useActionState } from "react";
 import Link from "next/link";
 
 import type { FormState } from "@/app/actions";
+import { RICH_TEXT_HINT } from "@/components/rich-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { pasteAsMarkup } from "@/lib/paste-markup";
 import type { Exercise } from "@/lib/types";
 
 type Props = {
@@ -46,8 +48,9 @@ export function ExerciseForm({ action, exercise, cancelHref }: Props) {
         <Field label="Titel" htmlFor="title">
           <Input id="title" name="title" defaultValue={exercise?.title} required autoFocus={!exercise} />
         </Field>
-        <Field label="Ablauf" htmlFor="procedure">
+        <Field label="Ablauf" htmlFor="procedure" hint={RICH_TEXT_HINT}>
           <Textarea
+            onPaste={pasteAsMarkup}
             id="procedure"
             name="procedure"
             defaultValue={exercise?.procedure}
@@ -57,7 +60,7 @@ export function ExerciseForm({ action, exercise, cancelHref }: Props) {
         </Field>
       </div>
 
-      <details className="group rounded-xl border px-4 py-3 sm:px-5" open={Boolean(exercise)}>
+      <details className="group rounded-xl border px-4 py-3 sm:px-5" open>
         <summary className="cursor-pointer list-none text-sm font-medium text-muted-foreground select-none group-open:mb-6 group-open:text-foreground">
           <span className="group-open:hidden">+ Weitere Angaben (optional)</span>
           <span className="hidden group-open:inline">Weitere Angaben (optional)</span>
@@ -66,9 +69,14 @@ export function ExerciseForm({ action, exercise, cancelHref }: Props) {
           <Field
             label="Wofür geeignet"
             htmlFor="suitable_for"
-            hint="Setting, Zielgruppe, Anlass, z. B. „zur Klärung eines unklaren Auftrags“"
+            hint="Setting, Zielgruppe, Anlass, z. B. „zur Klärung eines unklaren Auftrags“; Formatierung wie beim Ablauf"
           >
-            <Textarea id="suitable_for" name="suitable_for" defaultValue={exercise?.suitable_for ?? ""} />
+            <Textarea
+              id="suitable_for"
+              name="suitable_for"
+              defaultValue={exercise?.suitable_for ?? ""}
+              onPaste={pasteAsMarkup}
+            />
           </Field>
           <Field label="Tags" htmlFor="tags" hint="Mit Komma trennen, z. B. Warm-up, Körper, Supervision">
             <Input id="tags" name="tags" defaultValue={exercise?.tags.join(", ")} />
@@ -90,8 +98,8 @@ export function ExerciseForm({ action, exercise, cancelHref }: Props) {
               <Input id="group_size" name="group_size" defaultValue={exercise?.group_size ?? ""} />
             </Field>
           </div>
-          <Field label="Benötigtes Material" htmlFor="material">
-            <Textarea id="material" name="material" defaultValue={exercise?.material ?? ""} />
+          <Field label="Benötigtes Material" htmlFor="material" hint="Formatierung wie beim Ablauf">
+            <Textarea id="material" name="material" defaultValue={exercise?.material ?? ""} onPaste={pasteAsMarkup} />
           </Field>
           <Field label="Herkunft" htmlFor="origin" hint="Wo kennengelernt, selbst erfahren, Quelle">
             <Input id="origin" name="origin" defaultValue={exercise?.origin ?? ""} />

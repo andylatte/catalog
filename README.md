@@ -1,6 +1,10 @@
-# Übungskatalog
+# modulo
 
-Persönliche Web-App für Übungen aus Theatertherapie und Supervision: Übungen anlegen, per Suchschlitz und Tags finden, und unter jeder Übung ein Praxis-Log mit Datum und Fotos führen.
+Persönliche Web-App für Theatertherapie und Supervision. Die Startseite führt in zwei Bereiche.
+
+Der **Übungskatalog** unter `/catalog`: Übungen anlegen, per Suchschlitz und Tags finden, und unter jeder Übung ein Praxis-Log mit Datum und Fotos führen.
+
+Dazu gehört die **Sitzungsdoku** unter `/sessions`: Supervisions- und Therapiestunden mit Anhängen und Kommentaren dokumentieren, im gleichen Stil mit Petrol als Akzentfarbe.
 
 Gebaut mit Next.js (App Router), Tailwind CSS, shadcn/ui und Supabase (Datenbank, Login, Foto-Speicher).
 
@@ -9,7 +13,12 @@ Gebaut mit Next.js (App Router), Tailwind CSS, shadcn/ui und Supabase (Datenbank
 1. **Supabase-Projekt anlegen** auf [supabase.com](https://supabase.com).
 2. **Datenbank einrichten:** Im Dashboard unter *SQL Editor* den Inhalt von
    [`supabase/migrations/20261001000000_init.sql`](supabase/migrations/20261001000000_init.sql)
-   ausführen. Das legt Tabellen, Suche, Zugriffsregeln und den privaten Foto-Bucket `fotos` an.
+   ausführen, danach ebenso
+   [`supabase/migrations/20261001120000_sessions.sql`](supabase/migrations/20261001120000_sessions.sql)
+   für die Sitzungsdoku und danach
+   [`supabase/migrations/20261002080000_sessions_endzeit_teilnehmer.sql`](supabase/migrations/20261002080000_sessions_endzeit_teilnehmer.sql)
+   (Endzeit, Teilnehmerliste). Das legt Tabellen, Suche, Zugriffsregeln und die privaten Buckets
+   `fotos` und `anhaenge` an.
    (Alternativ mit der Supabase CLI: `npx supabase link` und `npx supabase db push`.)
 3. **Eigenes Konto anlegen:** *Authentication → Users → Add user* mit E-Mail und Passwort.
    Danach unter *Authentication → Sign In / Providers* die Option „Allow new users to sign up“
@@ -35,10 +44,13 @@ erreichbar; ohne Anmeldung sieht man nur die Login-Seite.
 
 | Pfad | Inhalt |
 | --- | --- |
-| `src/app/(katalog)/page.tsx` | Übersicht mit Suche und Tag-Filter |
-| `src/app/(katalog)/uebungen/` | Übung anlegen, ansehen, bearbeiten |
+| `src/app/page.tsx` | Startseite mit Logo und den beiden Bereichen |
+| `src/app/(katalog)/catalog/` | Übersicht mit Suche und Tag-Filter; Übung anlegen, ansehen, bearbeiten |
 | `src/app/actions.ts` | Speichern, Löschen, Anmelden (Server Actions) |
 | `src/components/comment-form.tsx` | Praxis-Log-Eintrag mit Foto-Upload |
+| `src/app/(sessions)/sessions/` | Sitzungsdoku: Liste, anlegen, ansehen, bearbeiten; `/sessions/<name>` zeigt alle Sitzungen mit einer Person |
+| `src/app/session-actions.ts` | Sitzungen und Kommentare speichern und löschen |
+| `src/components/session-form.tsx` | Eingabemaske einer Sitzung mit Datei-Upload |
 | `src/proxy.ts` | Leitet Abgemeldete zum Login |
 | `supabase/migrations/` | Datenbankschema, Suchfunktion, Zugriffsregeln |
 
@@ -51,3 +63,22 @@ online geeignet (ja/nein/keine Angabe), Herkunft, Gruppengröße, Material.
 
 **Fotos** werden vor dem Hochladen auf höchstens 2000 px verkleinert und liegen in einem
 privaten Bucket. Angezeigt werden sie über Links, die nach einer Stunde ablaufen.
+
+**Felder einer Sitzung:** Pflicht sind Art (Supervision oder Therapie) und Datum. Optional:
+Beginn und Ende (die Dauer wird daraus berechnet), Auftraggeber, Teilnehmer, Einzel/Gruppe, Live/Online mit Ort bzw.
+Plattform, Methoden/Programm, Beobachtungen, Selbstreflexion, Session-Notes (z. B. KI-Notizen aus Zoom,
+auf der Detailseite zugeklappt), Dateianhänge (bis 25 MB je Datei, Fotos werden
+wie im Katalog verkleinert). Die Übersicht zeigt Datum, Art, Dauer, Auftraggeber und Teilnehmer und lässt
+sich nach Art filtern und durchsuchen (Auftraggeber, Ort, Teilnehmer und alle Textfelder; jedes Wort muss
+vorkommen, die Fundstelle wird angezeigt). Anhänge als .txt, .md, .vtt (Zoom-Transkript), .docx und .pdf lassen
+öffnen sich auf der Detailseite per Klick auf die Kachel direkt darunter. Auf der Detailseite stehen die Kommentare. Teilnehmer werden als Namen
+eingegeben (bekannte werden vorgeschlagen); ein Klick auf einen Namen zeigt alle Sitzungen mit ihm.
+
+Beim Bearbeiten sind Metadaten (Art, Zeiten, Teilnehmer, Ort, Anhänge) und Inhalt (Methoden,
+Beobachtungen, Selbstreflexion, Session-Notes) getrennt; wer den Inhalt mit ungespeicherten Änderungen verlässt,
+wird vorher gefragt.
+
+**Formatierung** in allen längeren Textfeldern (Katalog: Wofür geeignet, Ablauf, Material, Praxis-Log; Sitzungsdoku: Methoden, Beobachtungen, Selbstreflexion, Session-Notes, Kommentare): `# ` am Zeilenanfang
+für Überschriften, `- ` oder `1. ` für Listen (eingerückt = Unterpunkt), `**fett**`, `[rot]Text[/rot]` (auch `grün`,
+`blau`, `orange`, `lila`). Formatierter Text aus Zoom Docs, Google Docs oder Word wird beim Einfügen
+automatisch in diese Schreibweise umgewandelt.

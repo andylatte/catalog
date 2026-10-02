@@ -6,8 +6,17 @@ import { Search, X } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 
+type Props = {
+  initialQuery: string;
+  /** Seite, deren Liste gefiltert wird, z. B. /catalog. */
+  path: string;
+  /** Weitere Filter, die beim Tippen erhalten bleiben, z. B. [["tag", "Warm-up"]]. */
+  keep?: [string, string][];
+  label: string;
+};
+
 /** Suchschlitz: aktualisiert die Liste während des Tippens. */
-export function SearchBox({ initialQuery, tags }: { initialQuery: string; tags: string[] }) {
+export function SearchBox({ initialQuery, path, keep = [], label }: Props) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const [pending, startTransition] = useTransition();
@@ -21,12 +30,12 @@ export function SearchBox({ initialQuery, tags }: { initialQuery: string; tags: 
     const timeout = setTimeout(() => {
       const params = new URLSearchParams();
       if (query.trim()) params.set("q", query.trim());
-      tags.forEach((tag) => params.append("tag", tag));
+      keep.forEach(([key, value]) => params.append(key, value));
       const search = params.toString();
-      startTransition(() => router.replace(search ? `/?${search}` : "/", { scroll: false }));
+      startTransition(() => router.replace(search ? `${path}?${search}` : path, { scroll: false }));
     }, 250);
     return () => clearTimeout(timeout);
-    // tags kommen vom Server und ändern sich nur über Links, nicht beim Tippen.
+    // keep kommt vom Server und ändert sich nur über Links, nicht beim Tippen.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query]);
 
@@ -38,8 +47,8 @@ export function SearchBox({ initialQuery, tags }: { initialQuery: string; tags: 
         name="q"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Übungen durchsuchen …"
-        aria-label="Übungen durchsuchen"
+        placeholder={`${label} …`}
+        aria-label={label}
         autoComplete="off"
         className="h-12 rounded-full pr-12 pl-12 text-base shadow-sm md:text-base [&::-webkit-search-cancel-button]:hidden"
         data-pending={pending ? "" : undefined}

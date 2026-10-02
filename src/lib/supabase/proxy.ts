@@ -1,7 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-/** Erneuert die Supabase-Sitzung und schickt Abgemeldete zum Login. */
+/**
+ * Erneuert die Supabase-Sitzung und schickt Abgemeldete zum Login.
+ * Die Sitzungsdoku verlangt zusätzlich den zweiten Faktor (aal2).
+ */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -33,6 +36,16 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.search = "";
+    return NextResponse.redirect(url);
+  }
+
+  const path = request.nextUrl.pathname;
+  const inSessions = path === "/sessions" || path.startsWith("/sessions/");
+  if (loggedIn && inSessions && data?.claims.aal !== "aal2") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/mfa";
+    url.search = "";
+    url.searchParams.set("weiter", path);
     return NextResponse.redirect(url);
   }
 

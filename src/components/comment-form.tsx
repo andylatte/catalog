@@ -4,11 +4,13 @@ import { useEffect, useId, useRef, useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 
 import { addComment, discardUploads } from "@/app/actions";
+import { RICH_TEXT_HINT } from "@/components/rich-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { extensionFor, shrinkImage } from "@/lib/images";
+import { pasteAsMarkup } from "@/lib/paste-markup";
 import { createClient } from "@/lib/supabase/client";
 
 type Pending = { file: File; preview: string };
@@ -102,12 +104,14 @@ export function CommentForm({ exerciseId, userId }: { exerciseId: string; userId
           Beobachtung
         </Label>
         <Textarea
+          onPaste={pasteAsMarkup}
           id={`${id}-body`}
           value={body}
           onChange={(event) => setBody(event.target.value)}
           placeholder="Wie lief es? Was ist aufgefallen?"
           className="min-h-24"
         />
+        <p className="text-xs text-muted-foreground">{RICH_TEXT_HINT}</p>
       </div>
 
       {photos.length > 0 && (
