@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ChevronRight, Clock, MapPin, Monitor, Pencil, Trash2, User, Users } from "lucide-react";
 
 import { addSessionComment, deleteSession, deleteSessionComment } from "@/app/session-actions";
-import { AttachmentReaders } from "@/components/attachment-reader";
-import { AttachmentGrid, AttachmentTile, isImageName, isReadableName } from "@/components/attachment-tile";
+import { SessionAttachments } from "@/components/attachment-reader";
+import { isImageName } from "@/components/attachment-tile";
 import { ConfirmButton } from "@/components/confirm-button";
 import { RichText } from "@/components/rich-text";
 import { SessionCommentForm } from "@/components/session-comment-form";
@@ -216,24 +216,16 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
 
       {files.length > 0 && (
         <Section title="Anhänge">
-          <AttachmentGrid>
-            {files.map((file) => {
+          <SessionAttachments
+            files={files.map((file) => {
               const url = fileUrls.get(file.path);
-              return (
-                <AttachmentTile
-                  key={file.id}
-                  name={file.name}
-                  size={file.size}
-                  href={url}
-                  previewUrl={url && isImageName(file.name) ? url : undefined}
-                />
-              );
-            })}
-          </AttachmentGrid>
-          <AttachmentReaders
-            files={files.flatMap((file) => {
-              const url = fileUrls.get(file.path);
-              return url && isReadableName(file.name) ? [{ id: file.id, name: file.name, url }] : [];
+              return {
+                id: file.id,
+                name: file.name,
+                size: file.size,
+                url,
+                previewUrl: url && isImageName(file.name) ? url : undefined,
+              };
             })}
           />
         </Section>

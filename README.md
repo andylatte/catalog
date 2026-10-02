@@ -71,7 +71,7 @@ auf der Detailseite zugeklappt), Dateianhänge (bis 25 MB je Datei, Fotos werden
 wie im Katalog verkleinert). Die Übersicht zeigt Datum, Art, Dauer, Auftraggeber und Teilnehmer und lässt
 sich nach Art filtern und durchsuchen (Auftraggeber, Ort, Teilnehmer und alle Textfelder; jedes Wort muss
 vorkommen, die Fundstelle wird angezeigt). Anhänge als .txt, .md, .vtt (Zoom-Transkript), .docx und .pdf lassen
-sich auf der Detailseite aufklappen und direkt lesen. Auf der Detailseite stehen die Kommentare. Teilnehmer werden als Namen
+öffnen sich auf der Detailseite per Klick auf die Kachel direkt darunter. Auf der Detailseite stehen die Kommentare. Teilnehmer werden als Namen
 eingegeben (bekannte werden vorgeschlagen); ein Klick auf einen Namen zeigt alle Sitzungen mit ihm.
 
 Beim Bearbeiten sind Metadaten (Art, Zeiten, Teilnehmer, Ort, Anhänge) und Inhalt (Methoden,

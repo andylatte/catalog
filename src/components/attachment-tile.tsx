@@ -20,7 +20,7 @@ export function isImageName(name: string) {
 
 const READABLE = /\.(txt|md|markdown|vtt|docx|pdf)$/i;
 
-/** Anhänge, deren Inhalt sich direkt auf der Seite lesen lässt (siehe AttachmentReaders). */
+/** Anhänge, deren Inhalt sich direkt auf der Seite lesen lässt (siehe SessionAttachments). */
 export function isReadableName(name: string) {
   return READABLE.test(name);
 }
@@ -46,6 +46,8 @@ type Props = {
   previewUrl?: string;
   /** Öffnet die Datei in einem neuen Tab. */
   href?: string;
+  /** Statt eines Links, z. B. um die Datei auf der Seite zu lesen. */
+  onClick?: () => void;
   /** Beim Bearbeiten zum Löschen vorgemerkt. */
   muted?: boolean;
   /** Hervorgehoben, z. B. noch nicht hochgeladene Dateien. */
@@ -55,7 +57,7 @@ type Props = {
 };
 
 /** Quadratische Kachel: Bilder als Vorschau, andere Dateien mit Typ-Symbol und Endung. */
-export function AttachmentTile({ name, size, previewUrl, href, muted, highlight, action }: Props) {
+export function AttachmentTile({ name, size, previewUrl, href, onClick, muted, highlight, action }: Props) {
   const Icon = ICONS.find(([pattern]) => pattern.test(name))?.[1] ?? File;
   const ext = extension(name);
 
@@ -80,15 +82,22 @@ export function AttachmentTile({ name, size, previewUrl, href, muted, highlight,
     </div>
   );
 
+  const interactive =
+    "block w-full rounded-md text-left transition-opacity hover:opacity-85 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none";
+
   return (
     <li className="relative min-w-0">
-      {href ? (
+      {onClick ? (
+        <button type="button" onClick={onClick} title={name} aria-pressed={highlight} className={interactive}>
+          {body}
+        </button>
+      ) : href ? (
         <a
           href={href}
           target="_blank"
           rel="noreferrer"
           title={name}
-          className="block rounded-md transition-opacity hover:opacity-85 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none"
+          className={interactive}
         >
           {body}
         </a>
