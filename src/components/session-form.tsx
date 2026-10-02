@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 import { Paperclip, Undo2, X } from "lucide-react";
 
 import { discardSessionUploads, saveSession, type NewSessionFile } from "@/app/session-actions";
+import { ParticipantsInput } from "@/components/participants-input";
+import { RICH_TEXT_HINT } from "@/components/rich-text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { formatFileSize } from "@/lib/format";
+import { formatDuration, formatFileSize, minutesBetween } from "@/lib/format";
 import { extensionFor, shrinkImage } from "@/lib/images";
 import { createClient } from "@/lib/supabase/client";
 import type { Session, SessionFile } from "@/lib/types";
@@ -22,6 +24,8 @@ type Props = {
   userId: string;
   session?: Session;
   files?: SessionFile[];
+  /** Bekannte Teilnehmer für die Vorschläge. */
+  knownParticipants: string[];
   cancelHref: string;
 };
 
@@ -115,7 +119,14 @@ function Choice({
   );
 }
 
-export function SessionForm({ userId, session, files = [], cancelHref, ...props }: Props) {
+export function SessionForm({
+  userId,
+  session,
+  files = [],
+  knownParticipants,
+  cancelHref,
+  ...props
+}: Props) {
   const id = useId();
   // Die ID steht schon vor dem Speichern fest, damit Anhänge in den richtigen Ordner kommen.
   const [sessionId] = useState(() => props.sessionId ?? crypto.randomUUID());
@@ -128,6 +139,9 @@ export function SessionForm({ userId, session, files = [], cancelHref, ...props 
   const [format, setFormat] = useState(
     session?.online === true ? "online" : session?.online === false ? "live" : "",
   );
+  const [startTime, setStartTime] = useState(session?.start_time?.slice(0, 5) ?? "");
+  const [endTime, setEndTime] = useState(session?.end_time?.slice(0, 5) ?? "");
+  const duration = formatDuration(minutesBetween(startTime || null, endTime || null));
   const [pending, setPending] = useState<File[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
   const [status, setStatus] = useState<string | null>(null);
@@ -224,36 +238,43 @@ export function SessionForm({ userId, session, files = [], cancelHref, ...props 
               required
             />
           </Field>
-          <Field label="Uhrzeit" htmlFor={`${id}-time`}>
+          <Field label="Beginn" htmlFor={`${id}-start`}>
             <Input
-              id={`${id}-time`}
+              id={`${id}-start`}
               name="start_time"
               type="time"
-              defaultValue={session?.start_time?.slice(0, 5) ?? ""}
+              value={startTime}
+              onChange={(event) => setStartTime(event.target.value)}
             />
           </Field>
-          <Field label="Dauer (Min.)" htmlFor={`${id}-duration`}>
+          <Field label="Ende" htmlFor={`${id}-end`}>
             <Input
-              id={`${id}-duration`}
-              name="duration_minutes"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              defaultValue={session?.duration_minutes ?? ""}
+              id={`${id}-end`}
+              name="end_time"
+              type="time"
+              value={endTime}
+              onChange={(event) => setEndTime(event.target.value)}
             />
           </Field>
+          <p className="col-span-2 -mt-2 text-xs text-muted-foreground sm:col-span-3 sm:text-right" aria-live="polite">
+            {duration ? `Dauer: ${duration}` : "Die Dauer wird aus Beginn und Ende berechnet."}
+          </p>
         </div>
 
         <Field label="Auftraggeber" htmlFor={`${id}-client`}>
           <Input id={`${id}-client`} name="client" defaultValue={session?.client ?? ""} />
         </Field>
 
-        <Field label="Teilnehmer" htmlFor={`${id}-participants`} hint="Namen oder Kürzel, bei Gruppen gern auch die Anzahl">
-          <Textarea
+        <Field
+          label="Teilnehmer"
+          htmlFor={`${id}-participants`}
+          hint="Enter oder Komma nach jedem Namen; bekannte Namen werden vorgeschlagen"
+        >
+          <ParticipantsInput
             id={`${id}-participants`}
             name="participants"
-            defaultValue={session?.participants ?? ""}
-            className="min-h-12"
+            defaultValue={session?.participants ?? []}
+            suggestions={knownParticipants}
           />
         </Field>
 
@@ -288,7 +309,7 @@ export function SessionForm({ userId, session, files = [], cancelHref, ...props 
           <Input id={`${id}-location`} name="location" defaultValue={session?.location ?? ""} />
         </Field>
 
-        <Field label="Methoden / Programm" htmlFor={`${id}-methods`}>
+        <Field label="Methoden / Programm" htmlFor={`${id}-methods`} hint={RICH_TEXT_HINT}>
           <Textarea
             id={`${id}-methods`}
             name="methods"
@@ -297,7 +318,7 @@ export function SessionForm({ userId, session, files = [], cancelHref, ...props 
           />
         </Field>
 
-        <Field label="Beobachtungen" htmlFor={`${id}-observations`}>
+        <Field label="Beobachtungen" htmlFor={`${id}-observations`} hint={RICH_TEXT_HINT}>
           <Textarea
             id={`${id}-observations`}
             name="observations"

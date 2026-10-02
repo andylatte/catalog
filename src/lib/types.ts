@@ -45,8 +45,10 @@ export type Session = {
   kind: SessionKind;
   held_on: string;
   start_time: string | null;
+  end_time: string | null;
+  /** Wird beim Speichern aus Start und Ende berechnet. */
   duration_minutes: number | null;
-  participants: string | null;
+  participants: string[];
   client: string | null;
   setting: SessionSetting | null;
   methods: string | null;
@@ -71,7 +73,12 @@ export type SessionComment = {
 };
 
 export const SESSION_COLUMNS =
-  "id, kind, held_on, start_time, duration_minutes, participants, client, setting, methods, observations, online, location, created_at, updated_at";
+  "id, kind, held_on, start_time, end_time, duration_minutes, participants, client, setting, methods, observations, online, location, created_at, updated_at";
+
+export type ParticipantCount = {
+  name: string;
+  count: number;
+};
 
 export const SESSION_KINDS: Record<SessionKind, string> = {
   supervision: "Supervision",

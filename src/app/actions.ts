@@ -64,8 +64,8 @@ export async function createExercise(_prev: FormState, formData: FormData): Prom
   const { data, error } = await supabase.from("exercises").insert(exercise).select("id").single();
   if (error) return { error: "Speichern hat nicht geklappt. Bitte versuch es noch einmal." };
 
-  revalidatePath("/exercises");
-  redirect(`/exercises/${data.id}`);
+  revalidatePath("/catalog");
+  redirect(`/catalog/${data.id}`);
 }
 
 export async function updateExercise(
@@ -81,9 +81,9 @@ export async function updateExercise(
   const { error } = await supabase.from("exercises").update(exercise).eq("id", id);
   if (error) return { error: "Speichern hat nicht geklappt. Bitte versuch es noch einmal." };
 
-  revalidatePath("/exercises");
-  revalidatePath(`/exercises/${id}`);
-  redirect(`/exercises/${id}`);
+  revalidatePath("/catalog");
+  revalidatePath(`/catalog/${id}`);
+  redirect(`/catalog/${id}`);
 }
 
 export async function deleteExercise(id: string) {
@@ -98,8 +98,8 @@ export async function deleteExercise(id: string) {
   }
 
   await supabase.from("exercises").delete().eq("id", id);
-  revalidatePath("/exercises");
-  redirect("/exercises");
+  revalidatePath("/catalog");
+  redirect("/catalog");
 }
 
 // Praxis-Log ------------------------------------------------------------
@@ -142,7 +142,7 @@ export async function addComment(input: {
     }
   }
 
-  revalidatePath(`/exercises/${input.exerciseId}`);
+  revalidatePath(`/catalog/${input.exerciseId}`);
 }
 
 export async function deleteComment(commentId: string, exerciseId: string) {
@@ -157,7 +157,7 @@ export async function deleteComment(commentId: string, exerciseId: string) {
   }
 
   await supabase.from("comments").delete().eq("id", commentId);
-  revalidatePath(`/exercises/${exerciseId}`);
+  revalidatePath(`/catalog/${exerciseId}`);
 }
 
 /** Fotos, die hochgeladen, aber nicht gespeichert wurden (z. B. Fehler beim Eintrag). */

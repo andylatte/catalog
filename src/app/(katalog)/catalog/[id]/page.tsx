@@ -25,7 +25,7 @@ async function loadExercise(id: string) {
 
 export async function generateMetadata({
   params,
-}: PageProps<"/exercises/[id]">): Promise<Metadata> {
+}: PageProps<"/catalog/[id]">): Promise<Metadata> {
   const exercise = await loadExercise((await params).id);
   return { title: exercise ? `${exercise.title} · Übungskatalog` : "Übungskatalog" };
 }
@@ -39,7 +39,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export default async function ExercisePage({ params }: PageProps<"/exercises/[id]">) {
+export default async function ExercisePage({ params }: PageProps<"/catalog/[id]">) {
   const { id } = await params;
   const exercise = await loadExercise(id);
   if (!exercise) notFound();
@@ -69,7 +69,7 @@ export default async function ExercisePage({ params }: PageProps<"/exercises/[id
     <article className="space-y-10">
       <div className="space-y-4">
         <Link
-          href="/exercises"
+          href="/catalog"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
@@ -79,7 +79,7 @@ export default async function ExercisePage({ params }: PageProps<"/exercises/[id
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{exercise.title}</h1>
           <div className="flex shrink-0 gap-1">
             <Button asChild variant="ghost" size="icon" aria-label="Bearbeiten">
-              <Link href={`/exercises/${exercise.id}/bearbeiten`}>
+              <Link href={`/catalog/${exercise.id}/bearbeiten`}>
                 <Pencil />
               </Link>
             </Button>

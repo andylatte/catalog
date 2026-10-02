@@ -22,10 +22,10 @@ function href(query: string, tags: string[]) {
   if (query) params.set("q", query);
   tags.forEach((tag) => params.append("tag", tag));
   const search = params.toString();
-  return search ? `/exercises?${search}` : "/exercises";
+  return search ? `/catalog?${search}` : "/catalog";
 }
 
-export default async function ExercisesPage({ searchParams }: PageProps<"/exercises">) {
+export default async function CatalogPage({ searchParams }: PageProps<"/catalog">) {
   const params = await searchParams;
   const query = (toList(params.q)[0] ?? "").trim();
   const selectedTags = toList(params.tag);
@@ -79,7 +79,7 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
             {filtering && (
               <>
                 {" · "}
-                <Link href="/exercises" className="underline underline-offset-4 hover:text-foreground">
+                <Link href="/catalog" className="underline underline-offset-4 hover:text-foreground">
                   Filter zurücksetzen
                 </Link>
               </>
@@ -93,7 +93,7 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
               ) : (
                 <>
                   Noch keine Übungen.{" "}
-                  <Link href="/exercises/neu" className="underline underline-offset-4 hover:text-foreground">
+                  <Link href="/catalog/neu" className="underline underline-offset-4 hover:text-foreground">
                     Erste Übung anlegen
                   </Link>
                 </>
@@ -104,7 +104,7 @@ export default async function ExercisesPage({ searchParams }: PageProps<"/exerci
               {exercises.map((exercise) => (
                 <li key={exercise.id}>
                   <Link
-                    href={`/exercises/${exercise.id}`}
+                    href={`/catalog/${exercise.id}`}
                     className="block space-y-2 px-4 py-4 transition-colors hover:bg-accent/50 sm:px-5"
                   >
                     <h2 className="font-medium leading-snug">{exercise.title}</h2>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { minutesBetween } from "@/lib/format";
 import { createClient, getUserId } from "@/lib/supabase/server";
 
 const FILE_BUCKET = "anhaenge";
@@ -25,18 +26,35 @@ function field(fields: Record<string, string>, name: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+const TIME = /^\d{2}:\d{2}(:\d{2})?$/;
+
+/** Ein Name pro Zeile; doppelte (ohne Groß/klein) fallen weg. */
+function parseParticipants(value: string) {
+  const seen = new Set<string>();
+  const names: string[] = [];
+  for (const raw of value.split("\n")) {
+    const name = raw.trim().replace(/\s+/g, " ").slice(0, 120);
+    if (name && !seen.has(name.toLowerCase())) {
+      seen.add(name.toLowerCase());
+      names.push(name);
+    }
+  }
+  return names;
+}
+
 function sessionFromFields(fields: Record<string, string>) {
   const kind = field(fields, "kind");
   const setting = field(fields, "setting");
   const format = field(fields, "format");
-  const startTime = field(fields, "start_time");
-  const duration = Number.parseInt(field(fields, "duration_minutes"), 10);
+  const startTime = TIME.test(field(fields, "start_time")) ? field(fields, "start_time") : null;
+  const endTime = TIME.test(field(fields, "end_time")) ? field(fields, "end_time") : null;
   return {
     kind: kind === "supervision" || kind === "therapie" ? kind : null,
     held_on: /^\d{4}-\d{2}-\d{2}$/.test(field(fields, "held_on")) ? field(fields, "held_on") : null,
-    start_time: /^\d{2}:\d{2}(:\d{2})?$/.test(startTime) ? startTime : null,
-    duration_minutes: Number.isFinite(duration) && duration > 0 ? duration : null,
-    participants: field(fields, "participants") || null,
+    start_time: startTime,
+    end_time: endTime,
+    duration_minutes: minutesBetween(startTime, endTime),
+    participants: parseParticipants(fields.participants ?? ""),
     client: field(fields, "client") || null,
     setting: setting === "einzel" || setting === "gruppe" ? setting : null,
     methods: field(fields, "methods") || null,

@@ -5,10 +5,12 @@ import { ArrowLeft, Clock, MapPin, Monitor, Paperclip, Pencil, Trash2, User, Use
 
 import { addSessionComment, deleteSession, deleteSessionComment } from "@/app/session-actions";
 import { ConfirmButton } from "@/components/confirm-button";
+import { RichText } from "@/components/rich-text";
 import { SessionCommentForm } from "@/components/session-comment-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate, formatDateTime, formatFileSize, formatTimeSpan } from "@/lib/format";
+import { formatDate, formatDateTime, formatFileSize, formatTimeSpan, slugify } from "@/lib/format";
+import { participantsForSlug } from "@/lib/sessions";
 import { createClient } from "@/lib/supabase/server";
 import {
   SESSION_COLUMNS,
@@ -18,6 +20,9 @@ import {
   type SessionFile,
 } from "@/lib/types";
 
+import { ParticipantSessions } from "../participant-sessions";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const IMAGE = /\.(jpe?g|png|webp|gif|heic|heif)$/i;
 
 async function loadSession(id: string) {
@@ -35,7 +40,13 @@ function heading(session: Session) {
 }
 
 export async function generateMetadata({ params }: PageProps<"/sessions/[id]">): Promise<Metadata> {
-  const session = await loadSession((await params).id);
+  const { id } = await params;
+  // /sessions/<uuid> ist eine Sitzung, alles andere ein Teilnehmer.
+  if (!UUID.test(id)) {
+    const [name] = await participantsForSlug(id);
+    return { title: name ? `Sitzungen mit ${name} · Sitzungsdoku` : "Sitzungsdoku" };
+  }
+  const session = await loadSession(id);
   return { title: session ? `${heading(session)} · Sitzungsdoku` : "Sitzungsdoku" };
 }
 
@@ -50,6 +61,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export default async function SessionPage({ params }: PageProps<"/sessions/[id]">) {
   const { id } = await params;
+  if (!UUID.test(id)) return <ParticipantSessions slug={id} />;
   const session = await loadSession(id);
   if (!session) notFound();
 
@@ -82,7 +94,7 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
   const images = files.filter((file) => IMAGE.test(file.name));
   const documents = files.filter((file) => !IMAGE.test(file.name));
 
-  const time = formatTimeSpan(session.start_time, session.duration_minutes);
+  const time = formatTimeSpan(session.start_time, session.end_time, session.duration_minutes);
   const hasMeta = time || session.setting || session.online !== null || session.location;
 
   return (
@@ -146,21 +158,29 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
         )}
       </div>
 
-      {session.participants && (
+      {session.participants.length > 0 && (
         <Section title="Teilnehmer">
-          <p className="whitespace-pre-wrap">{session.participants}</p>
+          <ul className="flex flex-wrap gap-1.5">
+            {session.participants.map((name) => (
+              <li key={name}>
+                <Badge asChild variant="outline" className="rounded-full px-3 py-1 text-sm font-normal">
+                  <Link href={`/sessions/${slugify(name)}`}>{name}</Link>
+                </Badge>
+              </li>
+            ))}
+          </ul>
         </Section>
       )}
 
       {session.methods && (
         <Section title="Methoden / Programm">
-          <p className="leading-relaxed whitespace-pre-wrap">{session.methods}</p>
+          <RichText text={session.methods} />
         </Section>
       )}
 
       {session.observations && (
         <Section title="Beobachtungen">
-          <p className="leading-relaxed whitespace-pre-wrap">{session.observations}</p>
+          <RichText text={session.observations} />
         </Section>
       )}
 
@@ -235,7 +255,7 @@ export default async function SessionPage({ params }: PageProps<"/sessions/[id]"
                     <Trash2 />
                   </ConfirmButton>
                 </div>
-                <p className="leading-relaxed whitespace-pre-wrap">{comment.body}</p>
+                <RichText text={comment.body} />
               </li>
             ))}
           </ol>
