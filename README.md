@@ -66,14 +66,19 @@ privaten Bucket. Angezeigt werden sie über Links, die nach einer Stunde ablaufe
 
 **Felder einer Sitzung:** Pflicht sind Art (Supervision oder Therapie) und Datum. Optional:
 Beginn und Ende (die Dauer wird daraus berechnet), Auftraggeber, Teilnehmer, Einzel/Gruppe, Live/Online mit Ort bzw.
-Plattform, Methoden/Programm, Beobachtungen, Selbstreflexion, Dateianhänge (bis 25 MB je Datei, Fotos werden
+Plattform, Methoden/Programm, Beobachtungen, Selbstreflexion, Session-Notes (z. B. KI-Notizen aus Zoom,
+auf der Detailseite zugeklappt), Dateianhänge (bis 25 MB je Datei, Fotos werden
 wie im Katalog verkleinert). Die Übersicht zeigt Datum, Art, Dauer, Auftraggeber und Teilnehmer und lässt
-sich nach Art filtern; auf der Detailseite stehen die Kommentare. Teilnehmer werden als Namen
+sich nach Art filtern und durchsuchen (Auftraggeber, Ort, Teilnehmer und alle Textfelder; jedes Wort muss
+vorkommen, die Fundstelle wird angezeigt). Anhänge als .txt, .md, .vtt (Zoom-Transkript), .docx und .pdf lassen
+sich auf der Detailseite aufklappen und direkt lesen. Auf der Detailseite stehen die Kommentare. Teilnehmer werden als Namen
 eingegeben (bekannte werden vorgeschlagen); ein Klick auf einen Namen zeigt alle Sitzungen mit ihm.
 
 Beim Bearbeiten sind Metadaten (Art, Zeiten, Teilnehmer, Ort, Anhänge) und Inhalt (Methoden,
-Beobachtungen, Selbstreflexion) getrennt; wer den Inhalt mit ungespeicherten Änderungen verlässt,
+Beobachtungen, Selbstreflexion, Session-Notes) getrennt; wer den Inhalt mit ungespeicherten Änderungen verlässt,
 wird vorher gefragt.
 
-**Formatierung** in allen längeren Textfeldern (Katalog: Wofür geeignet, Ablauf, Material, Praxis-Log; Sitzungsdoku: Methoden, Beobachtungen, Selbstreflexion, Kommentare): `- ` oder `1. ` am Zeilenanfang
-für Listen, `**fett**`, `[rot]Text[/rot]` (auch `grün`, `blau`, `orange`, `lila`).
+**Formatierung** in allen längeren Textfeldern (Katalog: Wofür geeignet, Ablauf, Material, Praxis-Log; Sitzungsdoku: Methoden, Beobachtungen, Selbstreflexion, Session-Notes, Kommentare): `# ` am Zeilenanfang
+für Überschriften, `- ` oder `1. ` für Listen (eingerückt = Unterpunkt), `**fett**`, `[rot]Text[/rot]` (auch `grün`,
+`blau`, `orange`, `lila`). Formatierter Text aus Zoom Docs, Google Docs oder Word wird beim Einfügen
+automatisch in diese Schreibweise umgewandelt.

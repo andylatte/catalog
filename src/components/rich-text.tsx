@@ -2,10 +2,12 @@ import { cn } from "@/lib/utils";
 
 /**
  * Einfache Formatierung ohne Menü:
- *   - Aufzählung (auch "* " oder "• ")      1. Nummerierte Liste
+ *   # Überschrift (auch ## und ###)
+ *   - Aufzählung (auch "* " oder "• ")      1. Nummerierte Liste; eingerückt = Unterpunkt
  *   **fett**                                 [rot]farbig[/rot] (rot, grün, blau, orange, lila)
  */
-export const RICH_TEXT_HINT = "Formatierung: - Aufzählung, **fett**, [rot]Text[/rot] (auch grün, blau, orange, lila)";
+export const RICH_TEXT_HINT =
+  "Formatierung: # Überschrift, - Aufzählung, **fett**, [rot]Text[/rot] (auch grün, blau, orange, lila)";
 
 const COLORS: Record<string, string> = {
   rot: "text-mark-red",
@@ -38,16 +40,25 @@ function inline(text: string): React.ReactNode[] {
   return nodes;
 }
 
+type Item = { text: string; level: number };
+
 type Block =
   | { type: "text"; lines: string[] }
-  | { type: "ul" | "ol"; items: string[] };
+  | { type: "heading"; text: string }
+  | { type: "ul" | "ol"; items: Item[] };
 
-const BULLET = /^\s*[-*•]\s+(.*)$/;
-const NUMBERED = /^\s*\d+[.)]\s+(.*)$/;
+const HEADING = /^\s{0,3}#{1,3}\s+(.*)$/;
+const BULLET = /^(\s*)[-*•]\s+(.*)$/;
+const NUMBERED = /^(\s*)\d+[.)]\s+(.*)$/;
 
 function blocks(source: string) {
   const result: Block[] = [];
   for (const line of source.replace(/\r\n?/g, "\n").split("\n")) {
+    const heading = HEADING.exec(line);
+    if (heading) {
+      result.push({ type: "heading", text: heading[1] });
+      continue;
+    }
     const bullet = BULLET.exec(line);
     const numbered = bullet ? null : NUMBERED.exec(line);
     const type = bullet ? "ul" : numbered ? "ol" : "text";
@@ -56,7 +67,9 @@ function blocks(source: string) {
       if (current?.type === "text") current.lines.push(line);
       else result.push({ type: "text", lines: [line] });
     } else {
-      const item = (bullet ?? numbered)![1];
+      const [, indent, text] = (bullet ?? numbered)!;
+      // Zwei Leerzeichen (oder ein Tab) Einrückung sind eine Ebene tiefer.
+      const item = { text, level: Math.min(Math.floor(indent.replace(/\t/g, "  ").length / 2), 3) };
       if (current?.type === type) current.items.push(item);
       else result.push({ type, items: [item] });
     }
@@ -68,7 +81,7 @@ function blocks(source: string) {
 export function plainText(text: string) {
   return text
     .replace(INLINE, (_match, bold, _color, colored) => bold ?? colored)
-    .replace(/^\s*(?:[-*•]|\d+[.)])\s+/gm, "")
+    .replace(/^\s*(?:[-*•]|\d+[.)]|#{1,3})\s+/gm, "")
     .replace(/\s*\n\s*/g, " · ");
 }
 
@@ -77,6 +90,13 @@ export function RichText({ text, className }: { text: string; className?: string
   return (
     <div className={cn("space-y-2 leading-relaxed", className)}>
       {blocks(text).map((block, index) => {
+        if (block.type === "heading") {
+          return (
+            <p key={index} className="pt-2 font-semibold first:pt-0">
+              {inline(block.text)}
+            </p>
+          );
+        }
         if (block.type === "text") {
           const content = block.lines.join("\n").replace(/^\n+|\n+$/g, "");
           if (!content) return null;
@@ -93,8 +113,12 @@ export function RichText({ text, className }: { text: string; className?: string
             className={cn("space-y-1 pl-5", List === "ul" ? "list-disc" : "list-decimal")}
           >
             {block.items.map((item, i) => (
-              <li key={i} className="pl-1 marker:text-muted-foreground">
-                {inline(item)}
+              <li
+                key={i}
+                className={cn("pl-1 marker:text-muted-foreground", item.level > 0 && List === "ul" && "list-[circle]")}
+                style={item.level ? { marginLeft: `${item.level * 1.25}rem` } : undefined}
+              >
+                {inline(item.text)}
               </li>
             ))}
           </List>

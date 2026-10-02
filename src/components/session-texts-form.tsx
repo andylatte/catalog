@@ -8,13 +8,13 @@ import { saveSessionTexts } from "@/app/session-actions";
 import { SessionTextFields } from "@/components/session-text-fields";
 import { useUnsavedGuard } from "@/components/unsaved-guard";
 import { Button } from "@/components/ui/button";
-import type { Session } from "@/lib/types";
+import type { Session, SessionTextName } from "@/lib/types";
 
 /** Bearbeiten von Methoden, Beobachtungen und Selbstreflexion, getrennt von den Metadaten. */
 export function SessionTextsForm({
   session,
 }: {
-  session: Pick<Session, "id" | "methods" | "observations" | "self_reflection">;
+  session: Pick<Session, "id" | SessionTextName>;
 }) {
   const router = useRouter();
   const form = useRef<HTMLFormElement>(null);

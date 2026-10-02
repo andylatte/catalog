@@ -62,7 +62,7 @@ function sessionFromFields(fields: Record<string, string>) {
   };
 }
 
-const TEXT_FIELDS = ["methods", "observations", "self_reflection"] as const;
+const TEXT_FIELDS = ["methods", "observations", "self_reflection", "notes"] as const;
 
 /** Nur die Textfelder, die im Formular vorkommen; beim Bearbeiten der Metadaten bleiben sie unberührt. */
 function textsFromFields(fields: Record<string, string>) {

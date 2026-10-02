@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { extensionFor, shrinkImage } from "@/lib/images";
+import { pasteAsMarkup } from "@/lib/paste-markup";
 import { createClient } from "@/lib/supabase/client";
 
 type Pending = { file: File; preview: string };
@@ -103,6 +104,7 @@ export function CommentForm({ exerciseId, userId }: { exerciseId: string; userId
           Beobachtung
         </Label>
         <Textarea
+          onPaste={pasteAsMarkup}
           id={`${id}-body`}
           value={body}
           onChange={(event) => setBody(event.target.value)}

@@ -18,8 +18,15 @@ export function isImageName(name: string) {
   return IMAGE.test(name);
 }
 
+const READABLE = /\.(txt|md|markdown|vtt|docx|pdf)$/i;
+
+/** Anhänge, deren Inhalt sich direkt auf der Seite lesen lässt (siehe AttachmentReaders). */
+export function isReadableName(name: string) {
+  return READABLE.test(name);
+}
+
 const ICONS: [RegExp, LucideIcon][] = [
-  [/\.(pdf|docx?|odt|rtf|txt|md|pages)$/i, FileText],
+  [/\.(pdf|docx?|odt|rtf|txt|md|markdown|vtt|pages)$/i, FileText],
   [/\.(xlsx?|ods|csv|numbers)$/i, FileSpreadsheet],
   [/\.(pptx?|odp|key)$/i, Presentation],
   [/\.(mp3|m4a|wav|ogg|aac|flac)$/i, FileAudio],
