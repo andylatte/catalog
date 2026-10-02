@@ -23,7 +23,7 @@ export function SearchBox({ initialQuery, tags }: { initialQuery: string; tags: 
       if (query.trim()) params.set("q", query.trim());
       tags.forEach((tag) => params.append("tag", tag));
       const search = params.toString();
-      startTransition(() => router.replace(search ? `/?${search}` : "/", { scroll: false }));
+      startTransition(() => router.replace(search ? `/exercises?${search}` : "/exercises", { scroll: false }));
     }, 250);
     return () => clearTimeout(timeout);
     // tags kommen vom Server und ändern sich nur über Links, nicht beim Tippen.

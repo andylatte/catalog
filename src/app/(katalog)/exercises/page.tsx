@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ExerciseMeta } from "@/components/exercise-meta";
@@ -6,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
 import type { Exercise, TagCount } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+export const metadata: Metadata = { title: "Übungskatalog" };
 
 type ListItem = Pick<Exercise, "id" | "title" | "suitable_for" | "tags" | "online" | "group_size">;
 
@@ -19,10 +22,10 @@ function href(query: string, tags: string[]) {
   if (query) params.set("q", query);
   tags.forEach((tag) => params.append("tag", tag));
   const search = params.toString();
-  return search ? `/?${search}` : "/";
+  return search ? `/exercises?${search}` : "/exercises";
 }
 
-export default async function HomePage({ searchParams }: PageProps<"/">) {
+export default async function ExercisesPage({ searchParams }: PageProps<"/exercises">) {
   const params = await searchParams;
   const query = (toList(params.q)[0] ?? "").trim();
   const selectedTags = toList(params.tag);
@@ -76,7 +79,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
             {filtering && (
               <>
                 {" · "}
-                <Link href="/" className="underline underline-offset-4 hover:text-foreground">
+                <Link href="/exercises" className="underline underline-offset-4 hover:text-foreground">
                   Filter zurücksetzen
                 </Link>
               </>
@@ -90,7 +93,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               ) : (
                 <>
                   Noch keine Übungen.{" "}
-                  <Link href="/uebungen/neu" className="underline underline-offset-4 hover:text-foreground">
+                  <Link href="/exercises/neu" className="underline underline-offset-4 hover:text-foreground">
                     Erste Übung anlegen
                   </Link>
                 </>
@@ -101,7 +104,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
               {exercises.map((exercise) => (
                 <li key={exercise.id}>
                   <Link
-                    href={`/uebungen/${exercise.id}`}
+                    href={`/exercises/${exercise.id}`}
                     className="block space-y-2 px-4 py-4 transition-colors hover:bg-accent/50 sm:px-5"
                   >
                     <h2 className="font-medium leading-snug">{exercise.title}</h2>

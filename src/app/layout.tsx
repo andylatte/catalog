@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Übungskatalog",
-  description: "Sammlung von Übungen für Theatertherapie und Supervision",
+  title: { default: "modulo", template: "%s · modulo" },
+  description: "Übungssammlung und Sitzungsdoku für Theatertherapie und Supervision",
 };
 
 export const viewport: Viewport = {

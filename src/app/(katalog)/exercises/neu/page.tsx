@@ -9,7 +9,7 @@ export default function NewExercisePage() {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold tracking-tight">Neue Übung</h1>
-      <ExerciseForm action={createExercise} cancelHref="/" />
+      <ExerciseForm action={createExercise} cancelHref="/exercises" />
     </div>
   );
 }

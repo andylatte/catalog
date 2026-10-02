@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LogOut, NotebookPen, Plus } from "lucide-react";
 
 import { signOut } from "@/app/actions";
+import { Logo } from "@/components/logo";
 import { Button } from "@/components/ui/button";
 
 export default function KatalogLayout({ children }: LayoutProps<"/">) {
@@ -9,9 +10,15 @@ export default function KatalogLayout({ children }: LayoutProps<"/">) {
     <>
       <header className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-3xl items-center justify-between gap-4 px-4">
-          <Link href="/" className="font-semibold tracking-tight">
-            Übungskatalog
-          </Link>
+          <div className="flex min-w-0 items-center gap-2">
+            <Link href="/" aria-label="Zur Startseite">
+              <Logo />
+            </Link>
+            <span className="text-muted-foreground/50">/</span>
+            <Link href="/exercises" className="truncate font-semibold tracking-tight">
+              Übungskatalog
+            </Link>
+          </div>
           <div className="flex items-center gap-1">
             <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
               <Link href="/sessions">
@@ -21,7 +28,7 @@ export default function KatalogLayout({ children }: LayoutProps<"/">) {
               </Link>
             </Button>
             <Button asChild size="sm">
-              <Link href="/uebungen/neu">
+              <Link href="/exercises/neu">
                 <Plus />
                 <span className="hidden sm:inline">Neue Übung</span>
                 <span className="sr-only sm:hidden">Neue Übung</span>

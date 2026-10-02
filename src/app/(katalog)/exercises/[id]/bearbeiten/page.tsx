@@ -5,7 +5,7 @@ import { ExerciseForm } from "@/components/exercise-form";
 import { createClient } from "@/lib/supabase/server";
 import { EXERCISE_COLUMNS, type Exercise } from "@/lib/types";
 
-export default async function EditExercisePage({ params }: PageProps<"/uebungen/[id]/bearbeiten">) {
+export default async function EditExercisePage({ params }: PageProps<"/exercises/[id]/bearbeiten">) {
   const { id } = await params;
   const supabase = await createClient();
   const { data: exercise } = await supabase
@@ -21,7 +21,7 @@ export default async function EditExercisePage({ params }: PageProps<"/uebungen/
       <ExerciseForm
         action={updateExercise.bind(null, exercise.id)}
         exercise={exercise}
-        cancelHref={`/uebungen/${exercise.id}`}
+        cancelHref={`/exercises/${exercise.id}`}
       />
     </div>
   );
