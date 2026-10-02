@@ -57,11 +57,20 @@ function sessionFromFields(fields: Record<string, string>) {
     participants: parseParticipants(fields.participants ?? ""),
     client: field(fields, "client") || null,
     setting: setting === "einzel" || setting === "gruppe" ? setting : null,
-    methods: field(fields, "methods") || null,
-    observations: field(fields, "observations") || null,
     online: format === "online" ? true : format === "live" ? false : null,
     location: field(fields, "location") || null,
   };
+}
+
+const TEXT_FIELDS = ["methods", "observations", "self_reflection"] as const;
+
+/** Nur die Textfelder, die im Formular vorkommen; beim Bearbeiten der Metadaten bleiben sie unberührt. */
+function textsFromFields(fields: Record<string, string>) {
+  const texts: Partial<Record<(typeof TEXT_FIELDS)[number], string | null>> = {};
+  for (const name of TEXT_FIELDS) {
+    if (name in fields) texts[name] = field(fields, name) || null;
+  }
+  return texts;
 }
 
 /** Legt eine Sitzung an oder speichert sie; Anhänge sind schon hochgeladen. */
@@ -70,7 +79,7 @@ export async function saveSession(input: SaveSessionInput): Promise<SaveSessionR
   if (!userId) return { error: "Bitte melde dich neu an." };
   if (!UUID.test(input.id)) return { error: "Ungültige Sitzung." };
 
-  const session = sessionFromFields(input.fields);
+  const session = { ...sessionFromFields(input.fields), ...textsFromFields(input.fields) };
   if (!session.kind) return { error: "Bitte wähle Supervision oder Therapie." };
   if (!session.held_on) return { error: "Bitte gib ein Datum ein." };
 
@@ -112,6 +121,25 @@ export async function saveSession(input: SaveSessionInput): Promise<SaveSessionR
   revalidatePath("/sessions");
   revalidatePath(`/sessions/${input.id}`);
   return { id: input.id };
+}
+
+/** Speichert nur Methoden, Beobachtungen und Selbstreflexion. */
+export async function saveSessionTexts(
+  id: string,
+  fields: Record<string, string>,
+): Promise<SaveSessionResult> {
+  if (!UUID.test(id)) return { error: "Ungültige Sitzung." };
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("sessions")
+    .update(textsFromFields(fields))
+    .eq("id", id)
+    .select("id");
+  if (error || !data?.length) {
+    return { error: "Speichern hat nicht geklappt. Bitte versuch es noch einmal." };
+  }
+  revalidatePath(`/sessions/${id}`);
+  return { id };
 }
 
 export async function deleteSession(id: string) {

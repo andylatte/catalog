@@ -7,11 +7,11 @@ import { Paperclip, Undo2, X } from "lucide-react";
 
 import { discardSessionUploads, saveSession, type NewSessionFile } from "@/app/session-actions";
 import { ParticipantsInput } from "@/components/participants-input";
-import { RICH_TEXT_HINT } from "@/components/rich-text";
+import { SessionTextFields } from "@/components/session-text-fields";
+import { useUnsavedGuard } from "@/components/unsaved-guard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { formatDuration, formatFileSize, minutesBetween } from "@/lib/format";
 import { extensionFor, shrinkImage } from "@/lib/images";
 import { createClient } from "@/lib/supabase/client";
@@ -27,6 +27,8 @@ type Props = {
   /** Bekannte Teilnehmer für die Vorschläge. */
   knownParticipants: string[];
   cancelHref: string;
+  /** Neue Sitzungen bekommen die Textfelder gleich mit; beim Bearbeiten gibt es dafür eine eigene Seite. */
+  withTexts?: boolean;
 };
 
 function today() {
@@ -125,6 +127,7 @@ export function SessionForm({
   files = [],
   knownParticipants,
   cancelHref,
+  withTexts = false,
   ...props
 }: Props) {
   const id = useId();
@@ -132,6 +135,9 @@ export function SessionForm({
   const [sessionId] = useState(() => props.sessionId ?? crypto.randomUUID());
   const router = useRouter();
   const fileInput = useRef<HTMLInputElement>(null);
+  const form = useRef<HTMLFormElement>(null);
+  const [textsDirty, setTextsDirty] = useState(false);
+  useUnsavedGuard(form, withTexts && textsDirty);
 
   const [saved, setSaved] = useState(Boolean(session));
   const [kind, setKind] = useState<string>(session?.kind ?? "");
@@ -203,6 +209,7 @@ export function SessionForm({
         setStatus(null);
         return;
       }
+      setTextsDirty(false);
       router.push(`/sessions/${sessionId}`);
     } catch {
       if (uploaded.length) {
@@ -214,7 +221,7 @@ export function SessionForm({
   }
 
   return (
-    <form onSubmit={submit} className="space-y-8">
+    <form ref={form} onSubmit={submit} className="space-y-8">
       <div className="space-y-6">
         <Choice
           name="kind"
@@ -309,23 +316,7 @@ export function SessionForm({
           <Input id={`${id}-location`} name="location" defaultValue={session?.location ?? ""} />
         </Field>
 
-        <Field label="Methoden / Programm" htmlFor={`${id}-methods`} hint={RICH_TEXT_HINT}>
-          <Textarea
-            id={`${id}-methods`}
-            name="methods"
-            defaultValue={session?.methods ?? ""}
-            className="min-h-24"
-          />
-        </Field>
-
-        <Field label="Beobachtungen" htmlFor={`${id}-observations`} hint={RICH_TEXT_HINT}>
-          <Textarea
-            id={`${id}-observations`}
-            name="observations"
-            defaultValue={session?.observations ?? ""}
-            className="min-h-40"
-          />
-        </Field>
+        {withTexts && <SessionTextFields onInput={() => setTextsDirty(true)} />}
 
         <div className="space-y-3">
           <p className="text-sm leading-none font-medium">Anhänge</p>

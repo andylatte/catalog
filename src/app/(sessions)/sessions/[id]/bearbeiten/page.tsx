@@ -25,7 +25,7 @@ export default async function EditSessionPage({ params }: PageProps<"/sessions/[
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Sitzung bearbeiten</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Metadaten bearbeiten</h1>
       <SessionForm
         sessionId={session.id}
         userId={userId}
